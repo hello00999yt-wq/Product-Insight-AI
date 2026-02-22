@@ -85,6 +85,10 @@ app.use((req, res, next) => {
     await setupVite(httpServer, app);
   }
 
+  // Seed the database
+  const { seedDatabase } = await import("./routes");
+  await seedDatabase();
+
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
