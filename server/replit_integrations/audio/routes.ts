@@ -91,14 +91,14 @@ export function registerAudioRoutes(app: Express): void {
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      res.write(`data: ${JSON.stringify({ type: "user_transcript", data: userTranscript })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: "user_transcript", data: String(userTranscript) })}\n\n`);
 
       // 6. Stream audio response from gpt-audio
       const stream = await openai.chat.completions.create({
         model: "gpt-audio",
         modalities: ["text", "audio"],
         audio: { voice, format: "pcm16" },
-        messages: chatHistory,
+        messages: chatHistory as any,
         stream: true,
       });
 
@@ -110,16 +110,16 @@ export function registerAudioRoutes(app: Express): void {
 
         if (delta?.audio?.transcript) {
           assistantTranscript += delta.audio.transcript;
-          res.write(`data: ${JSON.stringify({ type: "transcript", data: delta.audio.transcript })}\n\n`);
+          res.write(`data: ${JSON.stringify({ type: "transcript", data: String(delta.audio.transcript) })}\n\n`);
         }
 
         if (delta?.audio?.data) {
-          res.write(`data: ${JSON.stringify({ type: "audio", data: delta.audio.data })}\n\n`);
+          res.write(`data: ${JSON.stringify({ type: "audio", data: String(delta.audio.data) })}\n\n`);
         }
       }
 
       // 7. Save assistant message
-      await chatStorage.createMessage(conversationId, "assistant", assistantTranscript);
+      await chatStorage.createMessage(conversationId, "assistant", String(assistantTranscript));
 
       res.write(`data: ${JSON.stringify({ type: "done", transcript: assistantTranscript })}\n\n`);
       res.end();

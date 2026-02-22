@@ -1,5 +1,21 @@
 import { db } from "../../db";
-import { conversations, messages } from "@shared/schema";
+import { products } from "@shared/schema";
+import { pgTable, serial, integer, text, timestamp } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+
+export const conversations = pgTable("conversations", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
+  role: text("role").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
 import { eq, desc } from "drizzle-orm";
 
 export interface IChatStorage {

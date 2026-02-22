@@ -94,12 +94,12 @@ export function registerChatRoutes(app: Express): void {
         const content = chunk.choices[0]?.delta?.content || "";
         if (content) {
           fullResponse += content;
-          res.write(`data: ${JSON.stringify({ content })}\n\n`);
+          res.write(`data: ${JSON.stringify({ content: String(content) })}\n\n`);
         }
       }
 
       // Save assistant message
-      await chatStorage.createMessage(conversationId, "assistant", fullResponse);
+      await chatStorage.createMessage(conversationId, "assistant", String(fullResponse));
 
       res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
       res.end();
