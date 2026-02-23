@@ -53,6 +53,14 @@ export default function Home() {
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
               Upload a photo of any product to get instant details, price comparisons, and AI-driven authenticity checks.
             </p>
+            <div className="flex justify-center gap-4">
+              <Link href="/about">
+                <a className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity">
+                  <User className="w-5 h-5" />
+                  About Me
+                </a>
+              </Link>
+            </div>
           </motion.div>
         </div>
 
