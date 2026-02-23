@@ -37,8 +37,22 @@ export default function About() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div 
+        className="fixed inset-0 z-0 opacity-20 pointer-events-none"
+        style={{
+          backgroundImage: "url('https://images.unsplash.com/photo-1519389950473-47ba0277781c')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'grayscale(50%) brightness(0.5)'
+        }}
+      />
+      
+      {/* Gradient Overlay for better readability */}
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-background/80 via-background/40 to-background/80 pointer-events-none" />
+
+      <div className="container mx-auto px-4 py-12 max-w-4xl relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
