@@ -53,12 +53,6 @@ export default function Home() {
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
               Upload a photo of any product to get instant details, price comparisons, and AI-driven authenticity checks.
             </p>
-            <Link href="/about">
-              <span className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-card border border-border hover:bg-accent transition-colors font-medium cursor-pointer">
-                <User className="w-5 h-5" />
-                Meet the Creator
-              </span>
-            </Link>
           </motion.div>
         </div>
 
