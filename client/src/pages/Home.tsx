@@ -29,7 +29,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-x-hidden">
+    <div className="min-h-screen bg-mesh relative overflow-x-hidden">
       {/* Decorative background elements */}
       <div className="absolute top-0 -left-40 w-96 h-96 bg-primary/20 rounded-full blur-[128px] pointer-events-none opacity-50" />
       <div className="absolute top-40 -right-40 w-96 h-96 bg-accent/20 rounded-full blur-[128px] pointer-events-none opacity-50" />
@@ -54,10 +54,10 @@ export default function Home() {
               Upload a photo of any product to get instant details, price comparisons, and AI-driven authenticity checks.
             </p>
             <Link href="/about">
-              <a className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-card border border-border hover:bg-accent transition-colors font-medium">
+              <span className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-card border border-border hover:bg-accent transition-colors font-medium cursor-pointer">
                 <User className="w-5 h-5" />
                 Meet the Creator
-              </a>
+              </span>
             </Link>
           </motion.div>
         </div>

@@ -36,26 +36,30 @@ export default function ProductDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-mesh pb-20 relative overflow-x-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute top-0 -left-40 w-96 h-96 bg-primary/10 rounded-full blur-[128px] pointer-events-none opacity-50" />
+      <div className="absolute bottom-0 -right-40 w-96 h-96 bg-accent/10 rounded-full blur-[128px] pointer-events-none opacity-50" />
+
       {/* Navigation */}
-      <div className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-50">
+      <div className="border-b bg-card/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/">
-            <Button variant="ghost" size="sm" className="gap-2">
+            <Button variant="ghost" size="sm" className="gap-2 hover-elevate">
               <ArrowLeft className="w-4 h-4" />
               Back
             </Button>
           </Link>
-          <div className="font-semibold text-sm hidden md:block">
+          <div className="font-semibold text-sm hidden md:block text-primary">
             {product.name}
           </div>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" className="hover-elevate">
             <Share2 className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
-      <main className="container max-w-5xl mx-auto px-4 py-8">
+      <main className="container max-w-5xl mx-auto px-4 py-12 relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

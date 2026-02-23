@@ -40,9 +40,18 @@
   --risk-low: 142 71% 45%;
   --risk-medium: 45 93% 47%;
   --risk-high: 0 84% 60%;
-
+  
   --font-sans: 'DM Sans', sans-serif;
   --font-display: 'Outfit', sans-serif;
+}
+
+.bg-mesh {
+  background-color: hsl(var(--background));
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(226, 70%, 55%, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(262, 83%, 58%, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(226, 70%, 55%, 0.1) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(262, 83%, 58%, 0.1) 0px, transparent 50%);
 }
 
 .dark {
