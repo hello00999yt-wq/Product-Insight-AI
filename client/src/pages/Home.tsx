@@ -29,7 +29,18 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-mesh relative overflow-x-hidden">
+    <div className="min-h-screen bg-background relative overflow-x-hidden">
+      {/* Hero Background Image */}
+      <div 
+        className="absolute top-0 left-0 w-full h-[600px] z-0 opacity-20 pointer-events-none"
+        style={{
+          backgroundImage: "url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=2070&auto=format&fit=crop')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          maskImage: 'linear-gradient(to bottom, black, transparent)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black, transparent)'
+        }}
+      />
       {/* Decorative background elements */}
       <div className="absolute top-0 -left-40 w-96 h-96 bg-primary/20 rounded-full blur-[128px] pointer-events-none opacity-50" />
       <div className="absolute top-40 -right-40 w-96 h-96 bg-accent/20 rounded-full blur-[128px] pointer-events-none opacity-50" />
