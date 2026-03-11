@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import ProductDetails from "@/pages/ProductDetails";
 import About from "@/pages/About";
+import HelpAI from "@/components/HelpAI";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
+        <HelpAI />
       </TooltipProvider>
     </QueryClientProvider>
   );

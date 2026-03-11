@@ -115,6 +115,49 @@ export async function registerRoutes(
     }
   });
 
+  // Help AI Chat endpoint
+  app.post("/api/chat", async (req, res) => {
+    try {
+      const { messages } = req.body;
+      if (!messages || !Array.isArray(messages)) {
+        return res.status(400).json({ message: "Invalid messages format" });
+      }
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `You are "Help AI", a smart product authenticity assistant for an AI-powered fake product detection platform called "Identify Real vs Fake Products Instantly". 
+            
+Your purpose is to help users with:
+- Identifying fake vs real products
+- Understanding MRP (Maximum Retail Price) and why it matters
+- Checking and comparing market prices
+- Brand authenticity and verification tips
+- Product safety tips
+- Consumer protection advice
+- How to use the platform (upload a product image to get instant analysis)
+
+Be friendly, concise, and helpful. Use simple language. If someone asks about a specific product, give them practical fake-detection tips. Always encourage users to upload a product image for AI-powered analysis. Respond in the same language the user writes in (English or Hindi).`
+          },
+          ...messages
+        ],
+        max_tokens: 500,
+      });
+
+      const reply = response.choices[0]?.message?.content;
+      if (!reply) {
+        throw new Error("No response from AI");
+      }
+
+      res.json({ message: reply });
+    } catch (err) {
+      console.error("Chat error:", err);
+      res.status(500).json({ message: "Sorry, I couldn't process your request. Please try again." });
+    }
+  });
+
   return httpServer;
 }
 
