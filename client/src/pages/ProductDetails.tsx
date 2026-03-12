@@ -6,18 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useLang } from "@/context/LanguageContext";
 
 export default function ProductDetails() {
   const [, params] = useRoute("/product/:id");
   const id = params ? parseInt(params.id) : 0;
   const { data: product, isLoading, error } = useProduct(id);
+  const { t } = useLang();
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 text-primary animate-spin" />
-          <p className="text-muted-foreground animate-pulse">Loading product details...</p>
+          <p className="text-muted-foreground animate-pulse">{t("pd.loading")}</p>
         </div>
       </div>
     );
@@ -26,10 +28,10 @@ export default function ProductDetails() {
   if (error || !product) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-        <h2 className="text-2xl font-bold mb-2">Product Not Found</h2>
-        <p className="text-muted-foreground mb-6">We couldn't retrieve the details for this product.</p>
+        <h2 className="text-2xl font-bold mb-2">{t("pd.not_found")}</h2>
+        <p className="text-muted-foreground mb-6">{t("pd.not_found_desc")}</p>
         <Link href="/">
-          <Button>Return Home</Button>
+          <Button>{t("pd.return_home")}</Button>
         </Link>
       </div>
     );
@@ -42,12 +44,12 @@ export default function ProductDetails() {
       <div className="absolute bottom-0 -right-40 w-96 h-96 bg-accent/10 rounded-full blur-[128px] pointer-events-none opacity-50" />
 
       {/* Navigation */}
-      <div className="border-b bg-card/50 backdrop-blur-xl sticky top-0 z-50">
+      <div className="border-b bg-card/50 backdrop-blur-xl sticky top-14 z-30">
         <div className="container max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/">
             <Button variant="ghost" size="sm" className="gap-2 hover-elevate">
               <ArrowLeft className="w-4 h-4" />
-              Back
+              {t("pd.back")}
             </Button>
           </Link>
           <div className="font-semibold text-sm hidden md:block text-primary">
@@ -60,7 +62,7 @@ export default function ProductDetails() {
       </div>
 
       <main className="container max-w-5xl mx-auto px-4 py-12 relative z-10">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -69,8 +71,8 @@ export default function ProductDetails() {
           {/* Left Column - Image */}
           <div className="space-y-6">
             <div className="aspect-square rounded-3xl overflow-hidden bg-white border shadow-sm relative">
-              <img 
-                src={product.imageUrl} 
+              <img
+                src={product.imageUrl}
                 alt={product.name}
                 className="w-full h-full object-contain p-8"
               />
@@ -78,15 +80,15 @@ export default function ProductDetails() {
                 <RiskBadge level={product.fakeRiskLevel} className="bg-white/90 backdrop-blur" />
               </div>
             </div>
-            
+
             {/* Quick Stats Cards */}
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 rounded-xl bg-card border shadow-sm">
-                <p className="text-sm text-muted-foreground mb-1">MRP</p>
+                <p className="text-sm text-muted-foreground mb-1">{t("pd.mrp")}</p>
                 <p className="text-xl font-bold text-foreground">{product.mrp}</p>
               </div>
               <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
-                <p className="text-sm text-primary/80 mb-1">Market Price</p>
+                <p className="text-sm text-primary/80 mb-1">{t("pd.market_price")}</p>
                 <p className="text-xl font-bold text-primary">{product.marketPrice}</p>
               </div>
             </div>
@@ -114,9 +116,9 @@ export default function ProductDetails() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Info className="w-5 h-5 text-primary" />
-                <h3 className="text-xl font-bold">Authenticity Check</h3>
+                <h3 className="text-xl font-bold">{t("pd.authenticity")}</h3>
               </div>
-              
+
               <div className="space-y-3">
                 {product.identificationTips.map((tip, index) => (
                   <div key={index} className="flex gap-4 p-4 rounded-xl bg-muted/50 border border-border/50">
@@ -131,21 +133,21 @@ export default function ProductDetails() {
 
             <Separator />
 
-            {/* Customer Reviews (Dummy) */}
+            {/* Community Reviews */}
             <div>
-              <h3 className="text-xl font-bold mb-6">Community Reviews</h3>
+              <h3 className="text-xl font-bold mb-6">{t("pd.reviews")}</h3>
               <div className="space-y-6">
-                <Review 
-                  name="Alex Morgan" 
-                  rating={5} 
-                  date="2 days ago"
-                  text="Scan was super accurate! I was worried about buying this online but the tips helped me verify it was real."
+                <Review
+                  name="Alex Morgan"
+                  rating={5}
+                  date={t("pd.review1.date")}
+                  text={t("pd.review1.text")}
                 />
-                <Review 
-                  name="Sarah Chen" 
-                  rating={4} 
-                  date="1 week ago"
-                  text="Great app. Helped me spot a fake version of this product at a local store. The packaging font was slightly off just like the app said."
+                <Review
+                  name="Sarah Chen"
+                  rating={4}
+                  date={t("pd.review2.date")}
+                  text={t("pd.review2.text")}
                 />
               </div>
             </div>

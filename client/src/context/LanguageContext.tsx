@@ -9,6 +9,30 @@ interface LanguageContextType {
 }
 
 const translations: Record<string, Record<Language, string>> = {
+  // Product Details Page
+  "pd.back": { en: "Back", hi: "वापस" },
+  "pd.mrp": { en: "MRP", hi: "MRP" },
+  "pd.market_price": { en: "Market Price", hi: "बाजार मूल्य" },
+  "pd.authenticity": { en: "Authenticity Check", hi: "प्रामाणिकता जांच" },
+  "pd.reviews": { en: "Community Reviews", hi: "समुदाय समीक्षाएं" },
+  "pd.loading": { en: "Loading product details...", hi: "उत्पाद विवरण लोड हो रहा है..." },
+  "pd.not_found": { en: "Product Not Found", hi: "उत्पाद नहीं मिला" },
+  "pd.not_found_desc": { en: "We couldn't retrieve the details for this product.", hi: "हम इस उत्पाद का विवरण प्राप्त नहीं कर सके।" },
+  "pd.return_home": { en: "Return Home", hi: "होम पर वापस जाएं" },
+  "pd.risk_low": { en: "Low Risk", hi: "कम जोखिम" },
+  "pd.risk_medium": { en: "Medium Risk", hi: "मध्यम जोखिम" },
+  "pd.risk_high": { en: "High Risk", hi: "उच्च जोखिम" },
+  "pd.review1.text": {
+    en: "Scan was super accurate! I was worried about buying this online but the tips helped me verify it was real.",
+    hi: "स्कैन बहुत सटीक था! मुझे इसे ऑनलाइन खरीदने की चिंता थी लेकिन सुझावों ने इसे असली साबित करने में मदद की।",
+  },
+  "pd.review2.text": {
+    en: "Great app. Helped me spot a fake version of this product at a local store. The packaging font was slightly off just like the app said.",
+    hi: "शानदार ऐप। इसने मुझे एक स्थानीय दुकान में इस उत्पाद का नकली संस्करण पहचानने में मदद की। पैकेजिंग का फ़ॉन्ट थोड़ा अलग था, जैसा ऐप ने बताया था।",
+  },
+  "pd.review1.date": { en: "2 days ago", hi: "2 दिन पहले" },
+  "pd.review2.date": { en: "1 week ago", hi: "1 सप्ताह पहले" },
+
   // Help AI
   "ai.title": { en: "Help AI", hi: "सहायक AI" },
   "ai.subtitle": { en: "Product Authenticity Assistant", hi: "उत्पाद प्रामाणिकता सहायक" },
