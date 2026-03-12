@@ -6,6 +6,7 @@ import { useProducts, useAnalyzeProduct } from "@/hooks/use-products";
 import { Scan, ShieldCheck, Zap, History } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLang } from "@/context/LanguageContext";
+import heroBg from "@assets/IMG_20260312_074711_595_1773281986103.jpg";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -33,13 +34,14 @@ export default function Home() {
     <div className="min-h-screen bg-background relative overflow-x-hidden">
       {/* Hero Background Image */}
       <div
-        className="absolute top-0 left-0 w-full h-[600px] z-0 opacity-20 pointer-events-none"
+        className="absolute top-0 left-0 w-full h-[700px] z-0 pointer-events-none"
         style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=2070&auto=format&fit=crop')",
+          backgroundImage: `url(${heroBg})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          maskImage: 'linear-gradient(to bottom, black, transparent)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black, transparent)'
+          backgroundPosition: 'center top',
+          opacity: 0.18,
+          maskImage: 'linear-gradient(to bottom, black 60%, transparent)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent)'
         }}
       />
       {/* Decorative background elements */}
