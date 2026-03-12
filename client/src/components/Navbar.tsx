@@ -41,10 +41,10 @@ export default function Navbar() {
           <Link
             href="/about"
             data-testid="link-about"
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
               location === "/about"
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "border-primary text-primary hover:bg-primary hover:text-primary-foreground"
             }`}
           >
             {t("nav.about")}

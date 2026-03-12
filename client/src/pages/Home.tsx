@@ -3,8 +3,7 @@ import { useLocation } from "wouter";
 import { ImageUploader } from "@/components/ImageUploader";
 import { ProductCard } from "@/components/ProductCard";
 import { useProducts, useAnalyzeProduct } from "@/hooks/use-products";
-import { Scan, ShieldCheck, Zap, History, User } from "lucide-react";
-import { Link } from "wouter";
+import { Scan, ShieldCheck, Zap, History } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLang } from "@/context/LanguageContext";
 
@@ -66,16 +65,6 @@ export default function Home() {
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
               {t("home.subtitle")}
             </p>
-            <div className="flex justify-center gap-4">
-              <Link
-                href="/about"
-                data-testid="link-about-hero"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity"
-              >
-                <User className="w-5 h-5" />
-                {t("home.about_btn")}
-              </Link>
-            </div>
           </motion.div>
         </div>
 
