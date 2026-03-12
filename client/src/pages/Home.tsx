@@ -32,21 +32,38 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">
-      {/* Hero Background Image */}
-      <div
-        className="absolute top-0 left-0 w-full h-[700px] z-0 pointer-events-none"
-        style={{
-          backgroundImage: `url(${heroBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center top',
-          opacity: 0.18,
-          maskImage: 'linear-gradient(to bottom, black 60%, transparent)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent)'
-        }}
-      />
-      {/* Decorative background elements */}
-      <div className="absolute top-0 -left-40 w-96 h-96 bg-primary/20 rounded-full blur-[128px] pointer-events-none opacity-50" />
-      <div className="absolute top-40 -right-40 w-96 h-96 bg-accent/20 rounded-full blur-[128px] pointer-events-none opacity-50" />
+      {/* Hero Background Image — right side */}
+      <div className="absolute top-0 right-0 h-[780px] w-[48%] z-0 pointer-events-none overflow-hidden">
+        <img
+          src={heroBg}
+          alt=""
+          className="w-full h-full object-cover object-top"
+          style={{ filter: 'blur(2.5px) brightness(0.45) saturate(1.2)', opacity: 0.85 }}
+        />
+        {/* Strong left fade so text area stays clean */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)/0.95) 15%, hsl(var(--background)/0.5) 45%, transparent 70%)',
+          }}
+        />
+        {/* Bottom fade */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(to top, hsl(var(--background)) 0%, transparent 35%)',
+          }}
+        />
+        {/* Top fade */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 20%)',
+          }}
+        />
+      </div>
+      {/* Decorative blobs */}
+      <div className="absolute top-0 -left-40 w-96 h-96 bg-primary/15 rounded-full blur-[128px] pointer-events-none opacity-40" />
 
       <main className="container max-w-6xl mx-auto px-4 py-12 lg:py-20 relative z-10">
 
