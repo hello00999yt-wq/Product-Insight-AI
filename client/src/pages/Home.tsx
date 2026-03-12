@@ -6,7 +6,7 @@ import { useProducts, useAnalyzeProduct } from "@/hooks/use-products";
 import { Scan, ShieldCheck, Zap, History } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLang } from "@/context/LanguageContext";
-import heroBg from "@assets/IMG_20260312_074711_595_1773281986103.jpg";
+import heroBg from "@assets/IMG_20260312_074711_595_1773282658001.jpg";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -31,39 +31,18 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-x-hidden">
-      {/* Hero Background Image — right side */}
-      <div className="absolute top-0 right-0 h-[780px] w-[48%] z-0 pointer-events-none overflow-hidden">
+    <div className="min-h-screen relative overflow-x-hidden">
+      {/* Full-page background image */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
         <img
           src={heroBg}
           alt=""
-          className="w-full h-full object-cover object-top"
-          style={{ filter: 'blur(2.5px) brightness(0.45) saturate(1.2)', opacity: 0.85 }}
+          className="w-full h-full object-cover object-center"
+          style={{ filter: 'blur(6px) brightness(0.28) saturate(1.3)', transform: 'scale(1.05)' }}
         />
-        {/* Strong left fade so text area stays clean */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)/0.95) 15%, hsl(var(--background)/0.5) 45%, transparent 70%)',
-          }}
-        />
-        {/* Bottom fade */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(to top, hsl(var(--background)) 0%, transparent 35%)',
-          }}
-        />
-        {/* Top fade */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 20%)',
-          }}
-        />
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-black/40" />
       </div>
-      {/* Decorative blobs */}
-      <div className="absolute top-0 -left-40 w-96 h-96 bg-primary/15 rounded-full blur-[128px] pointer-events-none opacity-40" />
 
       <main className="container max-w-6xl mx-auto px-4 py-12 lg:py-20 relative z-10">
 
@@ -74,14 +53,14 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6">
-              <Zap className="w-4 h-4 fill-primary" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-white text-sm font-semibold mb-6 backdrop-blur-sm border border-white/20">
+              <Zap className="w-4 h-4 fill-white" />
               <span>{t("home.badge")}</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
+            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 text-white drop-shadow-lg">
               {t("home.title1")} <span className="text-gradient">{t("home.title2")}</span> {t("home.title3")}
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
+            <p className="text-lg md:text-xl text-white/75 leading-relaxed mb-8">
               {t("home.subtitle")}
             </p>
           </motion.div>
@@ -126,10 +105,10 @@ export default function Home() {
         {/* Recent Scans */}
         <section>
           <div className="flex items-center gap-2 mb-8">
-            <div className="bg-primary/10 p-2 rounded-lg">
-              <History className="w-5 h-5 text-primary" />
+            <div className="bg-white/15 p-2 rounded-lg backdrop-blur-sm border border-white/20">
+              <History className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-2xl font-bold">{t("home.recent")}</h2>
+            <h2 className="text-2xl font-bold text-white">{t("home.recent")}</h2>
           </div>
 
           {isHistoryLoading ? (
@@ -145,8 +124,8 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 border-2 border-dashed border-border rounded-3xl bg-card/50">
-              <p className="text-muted-foreground">{t("home.no_scans")}</p>
+            <div className="text-center py-12 border-2 border-dashed border-white/20 rounded-3xl bg-white/5 backdrop-blur-sm">
+              <p className="text-white/70">{t("home.no_scans")}</p>
             </div>
           )}
         </section>
@@ -158,12 +137,12 @@ export default function Home() {
 
 function FeatureCard({ icon: Icon, title, description }: { icon: any, title: string, description: string }) {
   return (
-    <div className="p-6 rounded-2xl bg-card border border-border/50 shadow-sm hover:shadow-md transition-shadow">
-      <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-        <Icon className="w-6 h-6 text-primary" />
+    <div className="p-6 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md shadow-lg hover:bg-white/15 transition-all">
+      <div className="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center mb-4">
+        <Icon className="w-6 h-6 text-white" />
       </div>
-      <h3 className="text-lg font-bold mb-2">{title}</h3>
-      <p className="text-muted-foreground leading-relaxed">{description}</p>
+      <h3 className="text-lg font-bold mb-2 text-white">{title}</h3>
+      <p className="text-white/65 leading-relaxed">{description}</p>
     </div>
   );
 }
