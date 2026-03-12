@@ -8,6 +8,8 @@ import Home from "@/pages/Home";
 import ProductDetails from "@/pages/ProductDetails";
 import About from "@/pages/About";
 import HelpAI from "@/components/HelpAI";
+import Navbar from "@/components/Navbar";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 function Router() {
   return (
@@ -15,7 +17,6 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/product/:id" component={ProductDetails} />
-      {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
   );
@@ -25,9 +26,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
-        <HelpAI />
+        <LanguageProvider>
+          <Toaster />
+          <Navbar />
+          <Router />
+          <HelpAI />
+        </LanguageProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

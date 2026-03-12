@@ -6,12 +6,14 @@ import { useProducts, useAnalyzeProduct } from "@/hooks/use-products";
 import { Scan, ShieldCheck, Zap, History, User } from "lucide-react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { useLang } from "@/context/LanguageContext";
 
 export default function Home() {
   const [, setLocation] = useLocation();
   const { data: history, isLoading: isHistoryLoading } = useProducts();
   const { mutate: analyze, isPending: isAnalyzing } = useAnalyzeProduct();
   const [error, setError] = useState<string | null>(null);
+  const { t } = useLang();
 
   const handleImageSelected = (base64: string) => {
     setError(null);
@@ -31,7 +33,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">
       {/* Hero Background Image */}
-      <div 
+      <div
         className="absolute top-0 left-0 w-full h-[600px] z-0 opacity-20 pointer-events-none"
         style={{
           backgroundImage: "url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=2070&auto=format&fit=crop')",
@@ -46,7 +48,7 @@ export default function Home() {
       <div className="absolute top-40 -right-40 w-96 h-96 bg-accent/20 rounded-full blur-[128px] pointer-events-none opacity-50" />
 
       <main className="container max-w-6xl mx-auto px-4 py-12 lg:py-20 relative z-10">
-        
+
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <motion.div
@@ -56,18 +58,22 @@ export default function Home() {
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6">
               <Zap className="w-4 h-4 fill-primary" />
-              <span>AI-Powered Transparency</span>
+              <span>{t("home.badge")}</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
-              Identify <span className="text-gradient">Real vs Fake</span> Products Instantly
+              {t("home.title1")} <span className="text-gradient">{t("home.title2")}</span> {t("home.title3")}
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
-              Upload a photo of any product to get instant details, price comparisons, and AI-driven authenticity checks.
+              {t("home.subtitle")}
             </p>
             <div className="flex justify-center gap-4">
-              <Link href="/about" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity">
+              <Link
+                href="/about"
+                data-testid="link-about-hero"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity"
+              >
                 <User className="w-5 h-5" />
-                About Me
+                {t("home.about_btn")}
               </Link>
             </div>
           </motion.div>
@@ -75,12 +81,12 @@ export default function Home() {
 
         {/* Upload Section */}
         <section className="mb-24">
-          <ImageUploader 
-            onImageSelected={handleImageSelected} 
-            isAnalyzing={isAnalyzing} 
+          <ImageUploader
+            onImageSelected={handleImageSelected}
+            isAnalyzing={isAnalyzing}
           />
           {error && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="mt-6 p-4 bg-destructive/10 text-destructive text-center rounded-xl border border-destructive/20 max-w-md mx-auto"
@@ -92,20 +98,20 @@ export default function Home() {
 
         {/* Features Grid */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
-          <FeatureCard 
-            icon={Scan} 
-            title="Instant Recognition" 
-            description="Our AI instantly identifies brand, model, and variant from a single photo." 
+          <FeatureCard
+            icon={Scan}
+            title={t("feature.recognition.title")}
+            description={t("feature.recognition.desc")}
           />
-          <FeatureCard 
-            icon={ShieldCheck} 
-            title="Fake Detection" 
-            description="Advanced algorithms analyze visual cues to estimate the risk of a counterfeit product." 
+          <FeatureCard
+            icon={ShieldCheck}
+            title={t("feature.fake.title")}
+            description={t("feature.fake.desc")}
           />
-          <FeatureCard 
-            icon={Zap} 
-            title="Price Check" 
-            description="Compare MRP with real market rates to ensure you're paying a fair price." 
+          <FeatureCard
+            icon={Zap}
+            title={t("feature.price.title")}
+            description={t("feature.price.desc")}
           />
         </section>
 
@@ -115,7 +121,7 @@ export default function Home() {
             <div className="bg-primary/10 p-2 rounded-lg">
               <History className="w-5 h-5 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold">Recent Scans</h2>
+            <h2 className="text-2xl font-bold">{t("home.recent")}</h2>
           </div>
 
           {isHistoryLoading ? (
@@ -132,7 +138,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="text-center py-12 border-2 border-dashed border-border rounded-3xl bg-card/50">
-              <p className="text-muted-foreground">No recent scans yet. Upload your first product!</p>
+              <p className="text-muted-foreground">{t("home.no_scans")}</p>
             </div>
           )}
         </section>

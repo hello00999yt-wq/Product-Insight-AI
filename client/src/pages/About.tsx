@@ -1,45 +1,54 @@
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { User, GraduationCap, MapPin, Trophy, Heart, Code, Search } from "lucide-react";
+import { useLang } from "@/context/LanguageContext";
 
 export default function About() {
+  const { t } = useLang();
+
   const sections = [
     {
-      title: "My Education",
+      key: "edu",
+      title: t("about.edu.title"),
       icon: <GraduationCap className="h-6 w-6 text-primary" />,
-      content: "I am currently studying in Class 10 at Selda Mal High School, and along with my studies, I have also worked under CodeYogi, where I learned web development."
+      content: t("about.edu.content"),
     },
     {
-      title: "My Current Location",
+      key: "location",
+      title: t("about.location.title"),
       icon: <MapPin className="h-6 w-6 text-primary" />,
-      content: "Selda Mal, District Khandwa"
+      content: t("about.location.content"),
     },
     {
-      title: "Interests",
+      key: "interests",
+      title: t("about.interests.title"),
       icon: <Trophy className="h-6 w-6 text-primary" />,
-      content: "I have been interested in cricket since childhood, and when I came to know about CodeYogi through my school, I also started it and developed a great interest in it."
+      content: t("about.interests.content"),
     },
     {
-      title: "Hobbies",
+      key: "hobbies",
+      title: t("about.hobbies.title"),
       icon: <Heart className="h-6 w-6 text-primary" />,
-      content: "My hobbies are drawing, playing cricket, coding, and learning about new technologies."
+      content: t("about.hobbies.content"),
     },
     {
-      title: "Journey to Coding",
+      key: "journey",
+      title: t("about.journey.title"),
       icon: <Code className="h-6 w-6 text-primary" />,
-      content: "I came to know about CodeYogi through my High School Selda Mal. With the help of CodeYogi, I learned how to code, gained knowledge about the new technological world, and also learned web development."
+      content: t("about.journey.content"),
     },
     {
-      title: "Project Overview",
+      key: "project",
+      title: t("about.project.title"),
       icon: <Search className="h-6 w-6 text-primary" />,
-      content: "This Project is an Image Recognition + Product Transparency Platform. On this platform, customers can upload a photo of any product. With the help of advanced image recognition technology, the system identifies the product and displays complete, verified, and reliable information related to it.\n\nThe main objective of this platform is to provide customers with accurate, transparent, and trustworthy information so that they can:\n• Avoid purchasing counterfeit products,\n• Avoid paying unnecessarily high prices,\n• Stay protected from fraud and exploitation,\n• Make informed and conscious purchasing decisions.\n\nBy providing verified product information, this platform aims to prevent consumer exploitation and promote transparency and fairness in the marketplace."
-    }
+      content: t("about.project.content"),
+    },
   ];
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background Image with Overlay */}
-      <div 
+      <div
         className="fixed inset-0 z-0 opacity-20 pointer-events-none"
         style={{
           backgroundImage: "url('https://images.unsplash.com/photo-1519389950473-47ba0277781c')",
@@ -48,7 +57,7 @@ export default function About() {
           filter: 'grayscale(50%) brightness(0.5)'
         }}
       />
-      
+
       {/* Gradient Overlay for better readability */}
       <div className="fixed inset-0 z-0 bg-gradient-to-b from-background/80 via-background/40 to-background/80 pointer-events-none" />
 
@@ -60,7 +69,7 @@ export default function About() {
           className="text-center mb-16"
         >
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-4">
-            MY INFORMATION
+            {t("about.title")}
           </h1>
           <div className="h-1 w-24 bg-primary mx-auto rounded-full" />
         </motion.div>
@@ -76,23 +85,23 @@ export default function About() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-lg">
                 <div className="flex items-center gap-3">
                   <User className="text-primary" />
-                  <span><strong>Name:</strong> Manish chandel</span>
+                  <span><strong>{t("about.name")}:</strong> Manish chandel</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center font-bold text-xs">14</div>
-                  <span><strong>Age:</strong> 14 Years</span>
+                  <span><strong>{t("about.age")}:</strong> {t("about.age_val")}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <GraduationCap className="text-primary" />
-                  <span><strong>School:</strong> H.S selda mal</span>
+                  <span><strong>{t("about.school")}:</strong> H.S selda mal</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <User className="text-primary/60" />
-                  <span><strong>Father:</strong> Mr. Ramprsad chandel</span>
+                  <span><strong>{t("about.father")}:</strong> Mr. Ramprsad chandel</span>
                 </div>
                 <div className="flex items-center gap-3 md:col-span-2">
                   <User className="text-primary/60" />
-                  <span><strong>Mother:</strong> Mrs. Meena chandel</span>
+                  <span><strong>{t("about.mother")}:</strong> Mrs. Meena chandel</span>
                 </div>
               </div>
             </CardContent>
@@ -102,11 +111,11 @@ export default function About() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {sections.map((section, index) => (
             <motion.div
-              key={section.title}
+              key={section.key}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index }}
-              className={section.title === "Project Overview" ? "md:col-span-2" : ""}
+              className={section.key === "project" ? "md:col-span-2" : ""}
             >
               <Card className="h-full hover:border-primary/50 transition-colors">
                 <CardContent className="pt-6">
