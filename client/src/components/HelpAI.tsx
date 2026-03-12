@@ -1,25 +1,27 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Bot, MessageCircle, Loader2 } from "lucide-react";
+import { useLang } from "@/context/LanguageContext";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
 
-const QUICK_REPLIES = [
-  "How to detect fake products?",
-  "What is MRP?",
-  "How to check brand authenticity?",
-  "Consumer safety tips",
-];
-
 export default function HelpAI() {
+  const { t, lang } = useLang();
+  const QUICK_REPLIES = [
+    t("ai.quick1"),
+    t("ai.quick2"),
+    t("ai.quick3"),
+    t("ai.quick4"),
+  ];
+
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hello 👋 I am Help AI. Ask me anything about products — I can help you detect fakes, understand MRP, check market prices, and protect yourself as a consumer!",
+      content: t("ai.welcome"),
     },
   ]);
   const [input, setInput] = useState("");
@@ -36,6 +38,11 @@ export default function HelpAI() {
       setTimeout(() => inputRef.current?.focus(), 300);
     }
   }, [isOpen]);
+
+  // Reset welcome message when language changes
+  useEffect(() => {
+    setMessages([{ role: "assistant", content: t("ai.welcome") }]);
+  }, [lang]);
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -92,7 +99,7 @@ export default function HelpAI() {
             }}
           >
             <MessageCircle className="w-5 h-5" />
-            Help AI
+            {t("ai.btn")}
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping opacity-75" />
           </motion.button>
         )}
@@ -128,8 +135,8 @@ export default function HelpAI() {
                   <Bot className="w-5 h-5 text-black" />
                 </div>
                 <div>
-                  <p className="font-bold text-black text-sm">Help AI</p>
-                  <p className="text-black/70 text-xs">Product Authenticity Assistant</p>
+                  <p className="font-bold text-black text-sm">{t("ai.title")}</p>
+                  <p className="text-black/70 text-xs">{t("ai.subtitle")}</p>
                 </div>
               </div>
               <button
@@ -253,7 +260,7 @@ export default function HelpAI() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
-                  placeholder="Ask about any product..."
+                  placeholder={t("ai.placeholder")}
                   className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-600"
                   style={{ color: "#e0e0e0" }}
                 />

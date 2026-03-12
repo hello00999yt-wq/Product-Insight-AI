@@ -9,6 +9,20 @@ interface LanguageContextType {
 }
 
 const translations: Record<string, Record<Language, string>> = {
+  // Help AI
+  "ai.title": { en: "Help AI", hi: "सहायक AI" },
+  "ai.subtitle": { en: "Product Authenticity Assistant", hi: "उत्पाद प्रामाणिकता सहायक" },
+  "ai.welcome": {
+    en: "Hello 👋 I am Help AI. Ask me anything about products — I can help you detect fakes, understand MRP, check market prices, and protect yourself as a consumer!",
+    hi: "नमस्ते 👋 मैं सहायक AI हूँ। उत्पादों के बारे में कुछ भी पूछें — मैं नकली उत्पाद पहचानने, MRP समझने, बाजार मूल्य जांचने और उपभोक्ता के रूप में आपकी सुरक्षा में मदद कर सकता हूँ!",
+  },
+  "ai.placeholder": { en: "Ask about any product...", hi: "किसी भी उत्पाद के बारे में पूछें..." },
+  "ai.btn": { en: "Help AI", hi: "सहायक AI" },
+  "ai.quick1": { en: "How to detect fake products?", hi: "नकली उत्पाद कैसे पहचानें?" },
+  "ai.quick2": { en: "What is MRP?", hi: "MRP क्या है?" },
+  "ai.quick3": { en: "How to check brand authenticity?", hi: "ब्रांड की असलियत कैसे जांचें?" },
+  "ai.quick4": { en: "Consumer safety tips", hi: "उपभोक्ता सुरक्षा सुझाव" },
+
   // Navbar
   "nav.toggle_hi": { en: "हिंदी", hi: "हिंदी" },
   "nav.toggle_en": { en: "English", hi: "English" },
