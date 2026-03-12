@@ -83,6 +83,7 @@ const translations: Record<string, Record<Language, string>> = {
 
   // Recent Scans
   "home.recent": { en: "Recent Scans", hi: "हाल की स्कैन" },
+  "home.scan_btn": { en: "Scan Product", hi: "उत्पाद स्कैन करें" },
   "home.no_scans": {
     en: "No recent scans yet. Upload your first product!",
     hi: "अभी कोई स्कैन नहीं है। अपना पहला उत्पाद अपलोड करें!",
