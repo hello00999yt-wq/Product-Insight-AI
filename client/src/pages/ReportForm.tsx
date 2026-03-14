@@ -91,9 +91,10 @@ export default function ReportForm() {
         zoomControl: true,
       });
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 18,
+      L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+        attribution: '© <a href="https://maps.google.com">Google Maps</a>',
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
       }).addTo(map);
 
       const markersLayer = L.layerGroup().addTo(map);
