@@ -43,10 +43,11 @@ export function ImageUploader({ onImageSelected, isAnalyzing }: ImageUploaderPro
             exit={{ opacity: 0, y: -10 }}
             {...getRootProps()}
             className={cn(
-              "relative group cursor-pointer overflow-hidden rounded-3xl border-3 border-dashed border-border bg-background p-12 text-center transition-all duration-300 hover:border-primary/50 hover:bg-primary/5",
-              isDragActive && "border-primary bg-primary/10 scale-[1.02]",
+              "relative group cursor-pointer overflow-hidden rounded-3xl border-2 border-dashed border-blue-500/50 bg-background p-12 text-center transition-all duration-300 hover:border-blue-400 hover:bg-blue-500/5",
+              isDragActive && "border-blue-400 bg-blue-500/10 scale-[1.02]",
               isAnalyzing && "pointer-events-none opacity-50"
             )}
+            style={{ boxShadow: isDragActive ? "0 0 30px rgba(59,130,246,0.3)" : "0 0 20px rgba(59,130,246,0.12)" }}
           >
             <input {...getInputProps()} />
             <div className="relative z-10 flex flex-col items-center justify-center gap-4">

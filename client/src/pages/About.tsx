@@ -80,7 +80,7 @@ export default function About() {
           transition={{ delay: 0.2 }}
           className="mb-12"
         >
-          <Card className="border-2 border-primary/20 bg-primary/5">
+          <Card className="border-2 border-blue-500/50 bg-primary/5" style={{ boxShadow: "0 0 20px rgba(59,130,246,0.15)" }}>
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-lg">
                 <div className="flex items-center gap-3">
@@ -117,7 +117,7 @@ export default function About() {
               transition={{ delay: 0.1 * index }}
               className={section.key === "project" ? "md:col-span-2" : ""}
             >
-              <Card className="h-full hover:border-primary/50 transition-colors">
+              <Card className="h-full border border-blue-500/40 hover:border-blue-400/70 transition-all duration-300" style={{ boxShadow: "0 0 14px rgba(59,130,246,0.1)" }}>
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
                     {section.icon}

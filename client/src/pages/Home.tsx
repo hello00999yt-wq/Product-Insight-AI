@@ -265,7 +265,7 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 border-2 border-dashed border-border rounded-3xl bg-card/50">
+            <div className="text-center py-12 border-2 border-dashed border-blue-500/40 rounded-3xl bg-card/50" style={{ boxShadow: "0 0 18px rgba(59,130,246,0.08)" }}>
               <p className="text-muted-foreground">{t("home.no_scans")}</p>
             </div>
           )}
@@ -278,7 +278,7 @@ export default function Home() {
 
 function FeatureCard({ icon: Icon, title, description }: { icon: any, title: string, description: string }) {
   return (
-    <div className="p-6 rounded-2xl bg-card border border-border/50 shadow-sm hover:shadow-md transition-shadow">
+    <div className="p-6 rounded-2xl bg-card border border-blue-500/40 shadow-sm hover:shadow-lg transition-all duration-300" style={{ boxShadow: "0 0 14px rgba(59,130,246,0.1)" }}>
       <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
         <Icon className="w-6 h-6 text-primary" />
       </div>

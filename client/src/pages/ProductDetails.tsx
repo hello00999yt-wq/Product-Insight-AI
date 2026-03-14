@@ -70,7 +70,7 @@ export default function ProductDetails() {
         >
           {/* Left Column - Image */}
           <div className="space-y-6">
-            <div className="aspect-square rounded-3xl overflow-hidden bg-white border shadow-sm relative">
+            <div className="aspect-square rounded-3xl overflow-hidden bg-white border-2 border-blue-500/50 relative" style={{ boxShadow: "0 0 25px rgba(59,130,246,0.2)" }}>
               <img
                 src={product.imageUrl}
                 alt={product.name}
@@ -83,11 +83,11 @@ export default function ProductDetails() {
 
             {/* Quick Stats Cards */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-card border shadow-sm">
+              <div className="p-4 rounded-xl bg-card border border-blue-500/40" style={{ boxShadow: "0 0 12px rgba(59,130,246,0.1)" }}>
                 <p className="text-sm text-muted-foreground mb-1">{t("pd.mrp")}</p>
                 <p className="text-xl font-bold text-foreground">{product.mrp}</p>
               </div>
-              <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
+              <div className="p-4 rounded-xl bg-primary/5 border border-blue-500/40" style={{ boxShadow: "0 0 12px rgba(59,130,246,0.1)" }}>
                 <p className="text-sm text-primary/80 mb-1">{t("pd.market_price")}</p>
                 <p className="text-xl font-bold text-primary">{product.marketPrice}</p>
               </div>
@@ -121,7 +121,7 @@ export default function ProductDetails() {
 
               <div className="space-y-3">
                 {product.identificationTips.map((tip, index) => (
-                  <div key={index} className="flex gap-4 p-4 rounded-xl bg-muted/50 border border-border/50">
+                  <div key={index} className="flex gap-4 p-4 rounded-xl bg-muted/50 border border-blue-500/30" style={{ boxShadow: "0 0 10px rgba(59,130,246,0.07)" }}>
                     <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
                       {index + 1}
                     </div>

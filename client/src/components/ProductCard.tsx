@@ -9,7 +9,7 @@ export function ProductCard({ product }: { product: Product }) {
   
   return (
     <Link href={`/product/${product.id}`} className="block group">
-      <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+      <div className="relative overflow-hidden rounded-2xl border border-blue-500/40 bg-card shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300" style={{ boxShadow: "0 0 15px rgba(59,130,246,0.1)" }}>
         <div className="aspect-[4/3] overflow-hidden bg-muted">
           <img 
             src={product.imageUrl} 
