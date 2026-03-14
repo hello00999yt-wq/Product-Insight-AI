@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useLang } from "@/context/LanguageContext";
 import { motion } from "framer-motion";
-import { ShieldCheck, Languages } from "lucide-react";
+import { ShieldCheck, Languages, Flag } from "lucide-react";
 
 export default function Navbar() {
   const { lang, toggleLang, t } = useLang();
@@ -37,6 +37,19 @@ export default function Navbar() {
             }`}
           >
             {t("nav.home")}
+          </Link>
+          <Link
+            href="/report"
+            data-testid="link-report"
+            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              location === "/report"
+                ? "bg-emerald-500/15 text-emerald-500"
+                : "text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10"
+            }`}
+          >
+            <Flag className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Report a Shop / Product</span>
+            <span className="md:hidden">Report</span>
           </Link>
           <Link
             href="/about"

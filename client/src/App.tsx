@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import ProductDetails from "@/pages/ProductDetails";
 import About from "@/pages/About";
+import ReportForm from "@/pages/ReportForm";
 import HelpAI from "@/components/HelpAI";
 import Navbar from "@/components/Navbar";
 import { LanguageProvider } from "@/context/LanguageContext";
@@ -16,6 +17,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
+      <Route path="/report" component={ReportForm} />
       <Route path="/product/:id" component={ProductDetails} />
       <Route component={NotFound} />
     </Switch>
