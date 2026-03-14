@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Upload, Star, ShieldCheck, AlertTriangle, CheckCircle2, XCircle, FileImage, Video, Receipt, Package } from "lucide-react";
+import { MapPin, Upload, Star, ShieldCheck, AlertTriangle, CheckCircle2, XCircle, FileImage, Video, Receipt, Package, Search, Navigation } from "lucide-react";
 
 interface Report {
   id: number;
@@ -80,6 +80,8 @@ export default function ReportForm() {
   const [submitMessage, setSubmitMessage] = useState("");
   const [submittedReports, setSubmittedReports] = useState<Report[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     if (!mapRef.current || leafletMapRef.current) return;
@@ -87,7 +89,7 @@ export default function ReportForm() {
     import("leaflet").then((L) => {
       const map = L.map(mapRef.current!, {
         center: [20.5937, 78.9629],
-        zoom: 5,
+        zoom: 13,
         zoomControl: true,
       });
 
@@ -255,6 +257,26 @@ export default function ReportForm() {
 
   const handleFileChange = (typeId: string, file: File | null) => {
     setUploadedFiles((prev) => ({ ...prev, [typeId]: file }));
+  };
+
+  const handleMapSearch = async (e?: React.SyntheticEvent) => {
+    if (e) e.preventDefault();
+    if (!searchQuery.trim() || !leafletMapRef.current) return;
+    setIsSearching(true);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery + ", India")}&format=json&limit=1`,
+        { headers: { "Accept-Language": "en" } }
+      );
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const { lat, lon } = data[0];
+        import("leaflet").then((L) => {
+          leafletMapRef.current.setView([parseFloat(lat), parseFloat(lon)], 16);
+        });
+      }
+    } catch (_) {}
+    setIsSearching(false);
   };
 
   return (
@@ -426,14 +448,46 @@ export default function ReportForm() {
 
           {/* ── Section 3: Map ── */}
           <Section title="Select Shop Location on India Map" icon="📍">
-            <p className="text-gray-500 text-sm mb-4">
-              Click anywhere on the map to drop a pin at the shop's location.
+            <p className="text-gray-500 text-sm mb-3">
+              Pehle apna city/area search karein, phir map par shop location click karein.
             </p>
+
+            {/* Search Bar */}
+            <div className="flex gap-2 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleMapSearch(); } }}
+                  placeholder="Search city, area, or shop name..."
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[#1e1844] bg-[#120e30] text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#8b5cf6]/60 focus:ring-1 focus:ring-[#8b5cf6]/30"
+                  data-testid="input-map-search"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => handleMapSearch()}
+                disabled={isSearching}
+                data-testid="button-map-search"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-60"
+                style={{ background: "linear-gradient(90deg,#8b5cf6,#3b82f6)", color: "#fff" }}
+              >
+                {isSearching ? (
+                  <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin inline-block" />
+                ) : (
+                  <Navigation className="w-4 h-4" />
+                )}
+                Go
+              </button>
+            </div>
+
             <div
               ref={mapRef}
               data-testid="map-india"
-              className="w-full rounded-xl overflow-hidden border border-[#1a2f1a]"
-              style={{ height: "400px", zIndex: 1 }}
+              className="w-full rounded-xl overflow-hidden border border-[#1e1844]"
+              style={{ height: "420px", zIndex: 1 }}
             />
             <AnimatePresence>
               {selectedLat !== null && selectedLng !== null ? (
