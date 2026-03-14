@@ -118,10 +118,16 @@ export async function registerRoutes(
   // Help AI Chat endpoint
   app.post("/api/chat", async (req, res) => {
     try {
-      const { messages } = req.body;
+      const { messages, lang } = req.body;
       if (!messages || !Array.isArray(messages)) {
         return res.status(400).json({ message: "Invalid messages format" });
       }
+
+      const langNames: Record<string, string> = {
+        en: "English", hi: "Hindi", mr: "Marathi", gu: "Gujarati",
+        bn: "Bengali", pa: "Punjabi", te: "Telugu", ur: "Urdu",
+      };
+      const respondLang = langNames[lang] || "English";
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
@@ -139,7 +145,9 @@ Your purpose is to help users with:
 - Consumer protection advice
 - How to use the platform (upload a product image to get instant analysis)
 
-Be friendly, concise, and helpful. Use simple language. If someone asks about a specific product, give them practical fake-detection tips. Always encourage users to upload a product image for AI-powered analysis. Respond in the same language the user writes in (English or Hindi).`
+Be friendly, concise, and helpful. Use simple language. If someone asks about a specific product, give them practical fake-detection tips. Always encourage users to upload a product image for AI-powered analysis.
+
+IMPORTANT: You MUST always respond in ${respondLang} language only, regardless of what language the user writes in. All your responses must be in ${respondLang}.`
           },
           ...messages
         ],
