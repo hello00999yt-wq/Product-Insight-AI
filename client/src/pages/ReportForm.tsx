@@ -82,6 +82,7 @@ export default function ReportForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   useEffect(() => {
     if (!mapRef.current || leafletMapRef.current) return;
@@ -237,6 +238,7 @@ export default function ReportForm() {
 
     setSubmittedReports([newReport, ...submittedReports]);
     setSubmitStatus("success");
+    setShowSuccessPopup(true);
 
     const ts = shopStatsMap[key].trustScore;
     const badge = ts >= 80 ? " — ⭐ Trusted Seller · 🟢 Verified Shop" : "";
@@ -665,6 +667,126 @@ export default function ReportForm() {
           </div>
         </Section>
       </div>
+
+      {/* ── Success Popup Modal ── */}
+      <AnimatePresence>
+        {showSuccessPopup && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              data-testid="popup-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-50 flex items-center justify-center px-4"
+              style={{ backgroundColor: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
+              onClick={() => setShowSuccessPopup(false)}
+            >
+              {/* Popup Card */}
+              <motion.div
+                data-testid="popup-success"
+                initial={{ opacity: 0, scale: 0.85, y: 32 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: "spring", stiffness: 320, damping: 28 }}
+                onClick={(e) => e.stopPropagation()}
+                className="relative w-full max-w-md rounded-3xl overflow-hidden"
+                style={{
+                  background: "linear-gradient(145deg, #0f0c2e, #130e35)",
+                  border: "1px solid rgba(34,197,94,0.3)",
+                  boxShadow: "0 0 60px rgba(34,197,94,0.18), 0 24px 60px rgba(0,0,0,0.6)",
+                }}
+              >
+                {/* Top glow strip */}
+                <div
+                  className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl"
+                  style={{ background: "linear-gradient(90deg, #22c55e, #4ade80, #22c55e)" }}
+                />
+
+                <div className="px-8 py-10 flex flex-col items-center text-center">
+                  {/* Animated checkmark circle */}
+                  <motion.div
+                    initial={{ scale: 0, rotate: -30 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
+                    className="relative mb-6"
+                  >
+                    <div
+                      className="w-20 h-20 rounded-full flex items-center justify-center"
+                      style={{
+                        background: "radial-gradient(circle, rgba(34,197,94,0.2) 0%, rgba(34,197,94,0.05) 70%)",
+                        border: "2px solid rgba(34,197,94,0.5)",
+                        boxShadow: "0 0 30px rgba(34,197,94,0.3)",
+                      }}
+                    >
+                      <CheckCircle2 className="w-10 h-10" style={{ color: "#22c55e" }} />
+                    </div>
+                    {/* Pulse ring */}
+                    <motion.div
+                      className="absolute inset-0 rounded-full"
+                      style={{ border: "2px solid rgba(34,197,94,0.4)" }}
+                      animate={{ scale: [1, 1.4, 1.4], opacity: [0.8, 0, 0] }}
+                      transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+                    />
+                  </motion.div>
+
+                  {/* Title */}
+                  <motion.h2
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-2xl font-extrabold mb-4"
+                    style={{
+                      background: "linear-gradient(90deg, #ffffff, #4ade80)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                    }}
+                  >
+                    Thank You! ✅
+                  </motion.h2>
+
+                  {/* Message body */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.28 }}
+                    className="space-y-2 mb-8"
+                  >
+                    <p className="text-white/90 font-semibold text-sm leading-relaxed">
+                      Your report has been successfully submitted.
+                    </p>
+                    <p className="text-gray-400 text-sm leading-relaxed">
+                      Our team will review the information shortly.
+                    </p>
+                    <p className="text-[#4ade80] text-sm font-medium leading-relaxed pt-1">
+                      Thank you for helping us keep the marketplace transparent.
+                    </p>
+                  </motion.div>
+
+                  {/* Close button */}
+                  <motion.button
+                    data-testid="button-close-popup"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.36 }}
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setShowSuccessPopup(false)}
+                    className="w-full py-3.5 rounded-2xl font-bold text-sm tracking-wide text-white transition-all"
+                    style={{
+                      background: "linear-gradient(90deg, #16a34a, #22c55e)",
+                      boxShadow: "0 0 20px rgba(34,197,94,0.35)",
+                    }}
+                  >
+                    Got it — Close
+                  </motion.button>
+                </div>
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
