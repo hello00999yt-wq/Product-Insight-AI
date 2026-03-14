@@ -258,7 +258,7 @@ export default function ReportForm() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070d14] text-white" style={{ fontFamily: "'Outfit', 'DM Sans', sans-serif" }}>
+    <div className="min-h-screen text-white" style={{ fontFamily: "'Outfit', 'DM Sans', sans-serif" }}>
       {/* Inline Leaflet CSS */}
       <link
         rel="stylesheet"
@@ -267,12 +267,12 @@ export default function ReportForm() {
       />
 
       {/* Hero Banner */}
-      <div className="relative overflow-hidden border-b border-[#00ff87]/20 bg-gradient-to-b from-[#0a1a0f] to-[#070d14]">
+      <div className="relative overflow-hidden border-b border-[#8b5cf6]/20 bg-gradient-to-b from-[#120b2e] to-[#0d0b1e]">
         <div
-          className="absolute inset-0 opacity-10"
+          className="absolute inset-0 opacity-20"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 20% 50%, #00ff87 0%, transparent 50%), radial-gradient(circle at 80% 50%, #00ccff 0%, transparent 50%)",
+              "radial-gradient(circle at 20% 50%, #8b5cf6 0%, transparent 50%), radial-gradient(circle at 80% 50%, #3b82f6 0%, transparent 50%)",
           }}
         />
         <div className="relative container max-w-4xl mx-auto px-4 py-12 text-center">
@@ -281,7 +281,7 @@ export default function ReportForm() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#00ff87]/40 bg-[#00ff87]/10 text-[#00ff87] text-xs font-semibold mb-4 tracking-widest uppercase">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#8b5cf6]/40 bg-[#8b5cf6]/10 text-[#a78bfa] text-xs font-semibold mb-4 tracking-widest uppercase">
               <ShieldCheck className="w-3.5 h-3.5" />
               AI-Powered Consumer Protection
             </div>
@@ -289,7 +289,7 @@ export default function ReportForm() {
               Report Fake Products &{" "}
               <span
                 style={{
-                  background: "linear-gradient(90deg, #00ff87, #00ccff)",
+                  background: "linear-gradient(90deg, #a78bfa, #60a5fa)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
@@ -361,14 +361,14 @@ export default function ReportForm() {
                     >
                       <Star
                         className="w-7 h-7"
-                        fill={s <= (hoverRating || rating) ? "#00ff87" : "none"}
-                        stroke={s <= (hoverRating || rating) ? "#00ff87" : "#4b5563"}
+                        fill={s <= (hoverRating || rating) ? "#a78bfa" : "none"}
+                        stroke={s <= (hoverRating || rating) ? "#a78bfa" : "#4b5563"}
                         strokeWidth={1.5}
                       />
                     </button>
                   ))}
                   {rating > 0 && (
-                    <span className="ml-2 text-sm text-[#00ff87] font-semibold">
+                    <span className="ml-2 text-sm text-[#a78bfa] font-semibold">
                       {["", "Poor", "Fair", "Average", "Good", "Excellent"][rating]}
                     </span>
                   )}
@@ -399,7 +399,7 @@ export default function ReportForm() {
                   <label
                     key={id}
                     data-testid={`upload-${id}`}
-                    className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#1a2f1a] bg-[#0d1a0d] hover:border-[#00ff87]/50 hover:bg-[#00ff87]/5 cursor-pointer transition-all p-5 text-center group"
+                    className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#1e1844] bg-[#120e30] hover:border-[#8b5cf6]/50 hover:bg-[#8b5cf6]/5 cursor-pointer transition-all p-5 text-center group"
                   >
                     <input
                       type="file"
@@ -408,13 +408,13 @@ export default function ReportForm() {
                       onChange={(e) => handleFileChange(id, e.target.files?.[0] ?? null)}
                     />
                     <div
-                      className="w-10 h-10 rounded-full bg-[#00ff87]/10 flex items-center justify-center group-hover:bg-[#00ff87]/20 transition-colors"
+                      className="w-10 h-10 rounded-full bg-[#8b5cf6]/10 flex items-center justify-center group-hover:bg-[#8b5cf6]/20 transition-colors"
                     >
-                      <Icon className="w-5 h-5 text-[#00ff87]" />
+                      <Icon className="w-5 h-5 text-[#a78bfa]" />
                     </div>
                     <span className="text-sm font-semibold text-gray-300">{label}</span>
                     {file ? (
-                      <span className="text-xs text-[#00ff87] truncate max-w-[160px]">{file.name}</span>
+                      <span className="text-xs text-[#a78bfa] truncate max-w-[160px]">{file.name}</span>
                     ) : (
                       <span className="text-xs text-gray-600">Click to upload</span>
                     )}
@@ -441,12 +441,12 @@ export default function ReportForm() {
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="mt-3 flex items-center gap-3 px-4 py-3 rounded-xl bg-[#00ff87]/10 border border-[#00ff87]/30"
+                  className="mt-3 flex items-center gap-3 px-4 py-3 rounded-xl bg-[#8b5cf6]/10 border border-[#8b5cf6]/30"
                 >
-                  <MapPin className="w-4 h-4 text-[#00ff87] shrink-0" />
+                  <MapPin className="w-4 h-4 text-[#a78bfa] shrink-0" />
                   <div className="text-sm">
                     <span className="text-gray-400 mr-2">Selected Location</span>
-                    <span className="text-[#00ff87] font-mono font-semibold">
+                    <span className="text-[#a78bfa] font-mono font-semibold">
                       Lat: {selectedLat} &nbsp; Lng: {selectedLng}
                     </span>
                   </div>
@@ -472,13 +472,13 @@ export default function ReportForm() {
               disabled={isSubmitting}
               whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
               whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-              className="relative w-full md:w-auto px-12 py-4 rounded-2xl font-bold text-base text-[#070d14] overflow-hidden disabled:opacity-70 disabled:cursor-not-allowed"
+              className="relative w-full md:w-auto px-12 py-4 rounded-2xl font-bold text-base overflow-hidden disabled:opacity-70 disabled:cursor-not-allowed"
               style={{
                 background: isSubmitting
-                  ? "#1a2f1a"
-                  : "linear-gradient(90deg, #00ff87, #00ccff)",
-                boxShadow: isSubmitting ? "none" : "0 0 24px rgba(0,255,135,0.35)",
-                color: isSubmitting ? "#00ff87" : "#070d14",
+                  ? "#1a1535"
+                  : "linear-gradient(90deg, #8b5cf6, #3b82f6)",
+                boxShadow: isSubmitting ? "none" : "0 0 24px rgba(139,92,246,0.4)",
+                color: isSubmitting ? "#a78bfa" : "#ffffff",
               }}
             >
               {isSubmitting ? (
@@ -502,7 +502,7 @@ export default function ReportForm() {
                   exit={{ opacity: 0 }}
                   className={`w-full flex items-start gap-3 px-5 py-4 rounded-2xl border text-sm font-medium ${
                     submitStatus === "success"
-                      ? "bg-[#00ff87]/10 border-[#00ff87]/40 text-[#00ff87]"
+                      ? "bg-[#8b5cf6]/10 border-[#8b5cf6]/40 text-[#a78bfa]"
                       : "bg-red-500/10 border-red-500/40 text-red-400"
                   }`}
                 >
@@ -538,7 +538,7 @@ export default function ReportForm() {
                         key={r.id}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-[#1a2f1a] bg-[#0d1a0d]"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-[#1e1844] bg-[#120e30]"
                       >
                         <div className="flex items-start gap-3">
                           <div
@@ -568,8 +568,8 @@ export default function ReportForm() {
                               <Star
                                 key={i}
                                 className="w-3.5 h-3.5"
-                                fill={i < r.rating ? "#00ff87" : "none"}
-                                stroke={i < r.rating ? "#00ff87" : "#374151"}
+                                fill={i < r.rating ? "#a78bfa" : "none"}
+                                stroke={i < r.rating ? "#a78bfa" : "#374151"}
                                 strokeWidth={1.5}
                               />
                             ))}
@@ -618,7 +618,7 @@ export default function ReportForm() {
 // ── Helpers ──
 
 const inputCls =
-  "w-full bg-[#0d1a0d] border border-[#1a3a1a] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#00ff87]/60 focus:ring-1 focus:ring-[#00ff87]/30 transition-colors";
+  "w-full bg-[#120e30] border border-[#1e1844] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#8b5cf6]/60 focus:ring-1 focus:ring-[#8b5cf6]/30 transition-colors";
 
 function Section({
   title,
@@ -636,14 +636,14 @@ function Section({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className={`rounded-2xl border border-[#1a2f1a] bg-[#0a150a] p-6 ${className}`}
-      style={{ boxShadow: "0 0 40px rgba(0,255,135,0.03)" }}
+      className={`rounded-2xl border border-[#1e1844] bg-[#0d0b1e]/80 backdrop-blur-sm p-6 ${className}`}
+      style={{ boxShadow: "0 0 40px rgba(139,92,246,0.05)" }}
     >
-      <h2 className="flex items-center gap-2 text-base md:text-lg font-bold text-white mb-5 pb-4 border-b border-[#1a2f1a]">
+      <h2 className="flex items-center gap-2 text-base md:text-lg font-bold text-white mb-5 pb-4 border-b border-[#1e1844]">
         <span className="text-lg">{icon}</span>
         <span
           style={{
-            background: "linear-gradient(90deg, #ffffff, #00ff87)",
+            background: "linear-gradient(90deg, #ffffff, #a78bfa)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
           }}
@@ -671,7 +671,7 @@ function Field({
     <div className={`flex flex-col gap-1.5 ${className}`}>
       <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
         {label}
-        {required && <span className="text-[#00ff87] ml-1">*</span>}
+        {required && <span className="text-[#a78bfa] ml-1">*</span>}
       </label>
       {children}
     </div>

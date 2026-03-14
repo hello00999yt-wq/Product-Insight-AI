@@ -101,9 +101,9 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="relative rounded-3xl overflow-hidden"
             style={{
-              background: "linear-gradient(135deg, #070d14 0%, #0a1a0f 50%, #070d14 100%)",
-              border: "1px solid rgba(0,255,135,0.2)",
-              boxShadow: "0 0 60px rgba(0,255,135,0.06), inset 0 1px 0 rgba(0,255,135,0.1)",
+              background: "linear-gradient(135deg, #0d0b1e 0%, #120b2e 50%, #0e1535 100%)",
+              border: "1px solid rgba(139,92,246,0.25)",
+              boxShadow: "0 0 60px rgba(139,92,246,0.08), inset 0 1px 0 rgba(139,92,246,0.1)",
             }}
           >
             {/* Background glow effects */}
@@ -111,7 +111,7 @@ export default function Home() {
               className="absolute inset-0 pointer-events-none"
               style={{
                 backgroundImage:
-                  "radial-gradient(circle at 15% 50%, rgba(0,255,135,0.08) 0%, transparent 50%), radial-gradient(circle at 85% 50%, rgba(0,204,255,0.06) 0%, transparent 50%)",
+                  "radial-gradient(circle at 15% 50%, rgba(139,92,246,0.1) 0%, transparent 50%), radial-gradient(circle at 85% 50%, rgba(59,130,246,0.08) 0%, transparent 50%)",
               }}
             />
 
@@ -122,9 +122,9 @@ export default function Home() {
                   <div
                     className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-4 tracking-widest uppercase"
                     style={{
-                      background: "rgba(0,255,135,0.1)",
-                      border: "1px solid rgba(0,255,135,0.3)",
-                      color: "#00ff87",
+                      background: "rgba(139,92,246,0.12)",
+                      border: "1px solid rgba(139,92,246,0.35)",
+                      color: "#a78bfa",
                     }}
                   >
                     <Flag className="w-3 h-3" />
@@ -136,7 +136,7 @@ export default function Home() {
                     Report Fake Products &{" "}
                     <span
                       style={{
-                        background: "linear-gradient(90deg, #00ff87, #00ccff)",
+                        background: "linear-gradient(90deg, #a78bfa, #60a5fa)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                       }}
@@ -157,9 +157,9 @@ export default function Home() {
                     whileTap={{ scale: 0.97 }}
                     className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-sm whitespace-nowrap cursor-pointer shrink-0"
                     style={{
-                      background: "linear-gradient(90deg, #00ff87, #00ccff)",
-                      color: "#070d14",
-                      boxShadow: "0 0 28px rgba(0,255,135,0.35)",
+                      background: "linear-gradient(90deg, #8b5cf6, #3b82f6)",
+                      color: "#ffffff",
+                      boxShadow: "0 0 28px rgba(139,92,246,0.4)",
                     }}
                   >
                     <Flag className="w-4 h-4" />
@@ -176,13 +176,13 @@ export default function Home() {
                     icon: Flag,
                     label: "Report Form",
                     desc: "Fill shop & product details with complaint reason",
-                    color: "#00ff87",
+                    color: "#a78bfa",
                   },
                   {
                     icon: Upload,
                     label: "Upload Evidence",
                     desc: "Attach photos, receipts, bills or videos",
-                    color: "#00ccff",
+                    color: "#60a5fa",
                   },
                   {
                     icon: MapPin,

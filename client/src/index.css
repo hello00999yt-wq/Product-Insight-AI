@@ -5,34 +5,34 @@
 @tailwind utilities;
 
 :root {
-  /* Elegant, Trustworthy Palette - Deep Indigo & Slate */
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
+  /* Purple-to-Blue Dark Theme */
+  --background: 240 28% 7%;
+  --foreground: 220 30% 96%;
 
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card: 245 28% 11%;
+  --card-foreground: 220 30% 96%;
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover: 245 28% 11%;
+  --popover-foreground: 220 30% 96%;
 
-  --primary: 226 70% 55%;  /* Vibrant Royal Blue */
-  --primary-foreground: 210 40% 98%;
+  --primary: 255 85% 65%;
+  --primary-foreground: 240 28% 7%;
 
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222 47% 11.2%;
+  --secondary: 245 25% 16%;
+  --secondary-foreground: 220 30% 96%;
 
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215 16% 47%;
+  --muted: 245 25% 16%;
+  --muted-foreground: 230 20% 60%;
 
-  --accent: 262 83% 58%; /* Purple accent for highlights */
-  --accent-foreground: 210 40% 98%;
+  --accent: 215 90% 60%;
+  --accent-foreground: 220 30% 96%;
 
   --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive-foreground: 220 30% 96%;
 
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 226 70% 55%;
+  --border: 245 25% 18%;
+  --input: 245 25% 18%;
+  --ring: 255 85% 65%;
 
   --radius: 1rem;
 
@@ -40,53 +40,24 @@
   --risk-low: 142 71% 45%;
   --risk-medium: 45 93% 47%;
   --risk-high: 0 84% 60%;
-  
+
   --font-sans: 'DM Sans', sans-serif;
   --font-display: 'Outfit', sans-serif;
 }
 
-.bg-mesh {
-  background-color: #f0fff4; /* Light green background */
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(72, 187, 120, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(56, 161, 105, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(72, 187, 120, 0.1) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(56, 161, 105, 0.1) 0px, transparent 50%);
+body {
+  background: linear-gradient(135deg, #0d0b1e 0%, #0e1535 40%, #120b2e 70%, #0b0e24 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
-.dark {
-  --background: 222 47% 11%;
-  --foreground: 210 40% 98%;
-
-  --card: 222 47% 11%;
-  --card-foreground: 210 40% 98%;
-
-  --popover: 222 47% 11%;
-  --popover-foreground: 210 40% 98%;
-
-  --primary: 217 91% 60%;
-  --primary-foreground: 222 47.4% 11.2%;
-
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 48%;
+.bg-mesh {
+  background: linear-gradient(135deg, #0d0b1e 0%, #0e1535 40%, #120b2e 70%, #0b0e24 100%);
 }
 
 @layer base {
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply text-foreground antialiased;
     font-family: var(--font-sans);
   }
 
@@ -98,9 +69,9 @@
 
 @layer components {
   .glass-panel {
-    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl shadow-black/5 dark:bg-black/40 dark:border-white/10;
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl shadow-black/20;
   }
-  
+
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary background-animate;
   }
