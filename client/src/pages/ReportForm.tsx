@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Upload, Star, ShieldCheck, AlertTriangle, CheckCircle2, XCircle, FileImage, Video, Receipt, Package, Search, Navigation } from "lucide-react";
 
@@ -62,6 +63,7 @@ const MARKER_SVG: Record<string, string> = {
 };
 
 export default function ReportForm() {
+  const [, navigate] = useLocation();
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
   const markersLayerRef = useRef<any>(null);
@@ -681,7 +683,7 @@ export default function ReportForm() {
               transition={{ duration: 0.2 }}
               className="fixed inset-0 z-50 flex items-center justify-center px-4"
               style={{ backgroundColor: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
-              onClick={() => setShowSuccessPopup(false)}
+              onClick={() => { setShowSuccessPopup(false); navigate("/"); }}
             >
               {/* Popup Card */}
               <motion.div
@@ -772,7 +774,7 @@ export default function ReportForm() {
                     transition={{ delay: 0.36 }}
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => setShowSuccessPopup(false)}
+                    onClick={() => { setShowSuccessPopup(false); navigate("/"); }}
                     className="w-full py-3.5 rounded-2xl font-bold text-sm tracking-wide text-white transition-all"
                     style={{
                       background: "linear-gradient(90deg, #16a34a, #22c55e)",
