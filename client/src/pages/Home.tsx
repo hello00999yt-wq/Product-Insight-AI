@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { ImageUploader } from "@/components/ImageUploader";
 import { ProductCard } from "@/components/ProductCard";
 import { useProducts, useAnalyzeProduct } from "@/hooks/use-products";
-import { Scan, ShieldCheck, Zap, History } from "lucide-react";
+import { Scan, ShieldCheck, Zap, History, Flag, MapPin, Star, ArrowRight, Upload } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLang } from "@/context/LanguageContext";
 
@@ -90,6 +90,157 @@ export default function Home() {
             title={t("feature.price.title")}
             description={t("feature.price.desc")}
           />
+        </section>
+
+        {/* Report Form CTA Section */}
+        <section className="mb-24">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="relative rounded-3xl overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, #070d14 0%, #0a1a0f 50%, #070d14 100%)",
+              border: "1px solid rgba(0,255,135,0.2)",
+              boxShadow: "0 0 60px rgba(0,255,135,0.06), inset 0 1px 0 rgba(0,255,135,0.1)",
+            }}
+          >
+            {/* Background glow effects */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 15% 50%, rgba(0,255,135,0.08) 0%, transparent 50%), radial-gradient(circle at 85% 50%, rgba(0,204,255,0.06) 0%, transparent 50%)",
+              }}
+            />
+
+            <div className="relative z-10 p-8 md:p-12">
+              {/* Header */}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8 mb-10">
+                <div>
+                  <div
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-4 tracking-widest uppercase"
+                    style={{
+                      background: "rgba(0,255,135,0.1)",
+                      border: "1px solid rgba(0,255,135,0.3)",
+                      color: "#00ff87",
+                    }}
+                  >
+                    <Flag className="w-3 h-3" />
+                    Consumer Protection System
+                  </div>
+                  <h2
+                    className="text-3xl md:text-4xl font-extrabold text-white mb-3 leading-tight"
+                  >
+                    Report Fake Products &{" "}
+                    <span
+                      style={{
+                        background: "linear-gradient(90deg, #00ff87, #00ccff)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                      }}
+                    >
+                      Shops
+                    </span>
+                  </h2>
+                  <p className="text-gray-400 max-w-lg text-sm md:text-base leading-relaxed">
+                    Spotted a fake product or dishonest shop? Submit a report with evidence,
+                    pin the location on India's map, and our AI will calculate the shop's
+                    Trust Score instantly.
+                  </p>
+                </div>
+
+                <Link href="/report" data-testid="link-report-cta">
+                  <motion.div
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-sm whitespace-nowrap cursor-pointer shrink-0"
+                    style={{
+                      background: "linear-gradient(90deg, #00ff87, #00ccff)",
+                      color: "#070d14",
+                      boxShadow: "0 0 28px rgba(0,255,135,0.35)",
+                    }}
+                  >
+                    <Flag className="w-4 h-4" />
+                    Submit a Report
+                    <ArrowRight className="w-4 h-4" />
+                  </motion.div>
+                </Link>
+              </div>
+
+              {/* Feature Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  {
+                    icon: Flag,
+                    label: "Report Form",
+                    desc: "Fill shop & product details with complaint reason",
+                    color: "#00ff87",
+                  },
+                  {
+                    icon: Upload,
+                    label: "Upload Evidence",
+                    desc: "Attach photos, receipts, bills or videos",
+                    color: "#00ccff",
+                  },
+                  {
+                    icon: MapPin,
+                    label: "Pin Location",
+                    desc: "Select exact shop location on India map",
+                    color: "#a78bfa",
+                  },
+                  {
+                    icon: Star,
+                    label: "Trust Score",
+                    desc: "AI validates & updates shop trust instantly",
+                    color: "#fbbf24",
+                  },
+                ].map(({ icon: Icon, label, desc, color }) => (
+                  <div
+                    key={label}
+                    className="rounded-2xl p-4"
+                    style={{
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(255,255,255,0.07)",
+                    }}
+                  >
+                    <div
+                      className="w-9 h-9 rounded-xl flex items-center justify-center mb-3"
+                      style={{ background: color + "18" }}
+                    >
+                      <Icon className="w-4 h-4" style={{ color }} />
+                    </div>
+                    <p className="text-white text-sm font-semibold mb-1">{label}</p>
+                    <p className="text-gray-500 text-xs leading-relaxed">{desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Trust Score Badge Row */}
+              <div className="flex flex-wrap items-center gap-3 mt-8 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <span className="text-gray-600 text-xs font-semibold uppercase tracking-wider">Marker Legend:</span>
+                {[
+                  { color: "#22c55e", label: "Trusted Shop", range: "80–100%" },
+                  { color: "#eab308", label: "Average Shop", range: "50–79%" },
+                  { color: "#ef4444", label: "Complaint Shop", range: "0–49%" },
+                ].map(({ color, label, range }) => (
+                  <div
+                    key={label}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                    style={{
+                      background: color + "15",
+                      border: `1px solid ${color}40`,
+                      color,
+                    }}
+                  >
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                    {label} · {range}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
         </section>
 
         {/* Recent Scans */}
