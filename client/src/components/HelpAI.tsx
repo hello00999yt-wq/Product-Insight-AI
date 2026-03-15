@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Bot, MessageCircle, Loader2 } from "lucide-react";
+import { X, Send, Bot, Loader2 } from "lucide-react";
 import { useLang } from "@/context/LanguageContext";
 
 interface Message {
@@ -88,30 +88,6 @@ export default function HelpAI() {
 
   return (
     <>
-      {/* Floating Button */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            data-testid="button-help-ai"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-5 py-3 rounded-full font-bold text-sm shadow-lg shadow-[#00ff88]/30"
-            style={{
-              background: "linear-gradient(135deg, #00ff88, #00cc6a)",
-              color: "#000",
-            }}
-          >
-            <MessageCircle className="w-5 h-5" />
-            {t("ai.btn")}
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping opacity-75" />
-          </motion.button>
-        )}
-      </AnimatePresence>
-
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
