@@ -74,29 +74,48 @@ export default function Home() {
         </section>
 
         {/* Inline Help AI CTA */}
-        <section className="flex justify-center mb-16 -mt-10">
-          <motion.button
-            data-testid="button-help-ai-inline"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(0,255,136,0.45)" }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => window.dispatchEvent(new CustomEvent("openHelpAI"))}
-            className="relative flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-base shadow-lg"
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex justify-center mb-16 -mt-10"
+        >
+          <div
+            className="flex items-center gap-6 px-8 py-5 rounded-2xl"
             style={{
-              background: "linear-gradient(135deg, #00ff88, #00cc6a)",
-              color: "#000",
-              boxShadow: "0 0 28px rgba(0,255,136,0.3)",
+              background: "linear-gradient(135deg, rgba(0,255,136,0.08) 0%, rgba(0,204,106,0.05) 100%)",
+              border: "1px solid rgba(0,255,136,0.2)",
+              boxShadow: "0 0 40px rgba(0,255,136,0.07), inset 0 1px 0 rgba(0,255,136,0.1)",
             }}
           >
-            <MessageCircle className="w-5 h-5" />
-            {t("ai.btn")}
-            <span
-              className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-white animate-ping opacity-70"
+            <div className="text-center hidden sm:block">
+              <p className="text-sm font-semibold text-[#00ff88]">{t("ai.title")}</p>
+              <p className="text-xs text-gray-500">{t("ai.subtitle")}</p>
+            </div>
+
+            <div
+              className="w-px h-8 hidden sm:block"
+              style={{ background: "rgba(0,255,136,0.2)" }}
             />
-          </motion.button>
-        </section>
+
+            <motion.button
+              data-testid="button-help-ai-inline"
+              whileHover={{ scale: 1.06, boxShadow: "0 0 36px rgba(0,255,136,0.5)" }}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => window.dispatchEvent(new CustomEvent("openHelpAI"))}
+              className="relative flex items-center gap-2.5 px-7 py-3 rounded-full font-bold text-sm"
+              style={{
+                background: "linear-gradient(135deg, #00ff88, #00cc6a)",
+                color: "#000",
+                boxShadow: "0 0 24px rgba(0,255,136,0.35)",
+              }}
+            >
+              <MessageCircle className="w-4 h-4" />
+              {t("ai.btn")}
+              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-white animate-ping opacity-60" />
+            </motion.button>
+          </div>
+        </motion.section>
 
         {/* Features Grid */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
