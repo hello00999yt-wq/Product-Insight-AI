@@ -39,6 +39,13 @@ export default function HelpAI() {
     }
   }, [isOpen]);
 
+  // Allow other parts of the page to open the chat
+  useEffect(() => {
+    const handler = () => setIsOpen(true);
+    window.addEventListener("openHelpAI", handler);
+    return () => window.removeEventListener("openHelpAI", handler);
+  }, []);
+
   // Reset welcome message when language changes
   useEffect(() => {
     setMessages([{ role: "assistant", content: t("ai.welcome") }]);

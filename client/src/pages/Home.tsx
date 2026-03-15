@@ -3,7 +3,7 @@ import { useLocation, Link } from "wouter";
 import { ImageUploader } from "@/components/ImageUploader";
 import { ProductCard } from "@/components/ProductCard";
 import { useProducts, useAnalyzeProduct } from "@/hooks/use-products";
-import { Scan, ShieldCheck, Zap, History, Flag, MapPin, Star, ArrowRight, Upload } from "lucide-react";
+import { Scan, ShieldCheck, Zap, History, Flag, MapPin, Star, ArrowRight, Upload, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLang } from "@/context/LanguageContext";
 
@@ -71,6 +71,31 @@ export default function Home() {
               {error}
             </motion.div>
           )}
+        </section>
+
+        {/* Inline Help AI CTA */}
+        <section className="flex justify-center mb-16 -mt-10">
+          <motion.button
+            data-testid="button-help-ai-inline"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(0,255,136,0.45)" }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => window.dispatchEvent(new CustomEvent("openHelpAI"))}
+            className="relative flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-base shadow-lg"
+            style={{
+              background: "linear-gradient(135deg, #00ff88, #00cc6a)",
+              color: "#000",
+              boxShadow: "0 0 28px rgba(0,255,136,0.3)",
+            }}
+          >
+            <MessageCircle className="w-5 h-5" />
+            {t("ai.btn")}
+            <span
+              className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-white animate-ping opacity-70"
+            />
+          </motion.button>
         </section>
 
         {/* Features Grid */}
