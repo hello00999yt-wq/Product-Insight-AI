@@ -1,5 +1,6 @@
 import { useRoute, Link } from "wouter";
 import { useProduct } from "@/hooks/use-products";
+import { IngredientsAndChemicals } from "@/components/IngredientsAndChemicals";
 import { Loader2, ArrowLeft, Star, Share2, Info } from "lucide-react";
 import { RiskBadge } from "@/components/RiskBadge";
 import { ProductStamp } from "@/components/ProductStamp";
@@ -156,6 +157,9 @@ export default function ProductDetails() {
 
           </div>
         </motion.div>
+
+        {/* ── Ingredients & Chemical Analysis ── */}
+        <IngredientsAndChemicals productId={id} />
       </main>
     </div>
   );

@@ -2,6 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, type ProductResponse, type ProductListResponse } from "@shared/routes";
 import { type AnalyzeProductRequest } from "@shared/schema";
 
+export type Ingredient = { name: string; percentage: number };
+export type Chemical   = { name: string; percentage: number; safety: "Safe" | "Warning" | "Harmful" };
+export type IngredientsData = { ingredients: Ingredient[]; chemicals: Chemical[] };
+
 // GET /api/products
 export function useProducts() {
   return useQuery({
@@ -68,5 +72,19 @@ export function useAnalyzeProduct() {
       // Invalidate the list so the new product appears in history
       queryClient.invalidateQueries({ queryKey: [api.products.list.path] });
     },
+  });
+}
+
+// GET /api/products/:id/ingredients
+export function useProductIngredients(id: number) {
+  return useQuery<IngredientsData>({
+    queryKey: ["/api/products", id, "ingredients"],
+    queryFn: async () => {
+      const res = await fetch(`/api/products/${id}/ingredients`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch ingredient data");
+      return res.json();
+    },
+    enabled: !!id,
+    staleTime: 1000 * 60 * 10, // cache for 10 min — same product, same data
   });
 }

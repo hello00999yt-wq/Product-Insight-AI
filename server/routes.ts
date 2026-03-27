@@ -224,6 +224,61 @@ IMPORTANT: You MUST always respond in ${respondLang} language only, regardless o
     }
   });
 
+  // ── Ingredients & Chemical Analysis for a product ──
+  app.get("/api/products/:id/ingredients", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid product ID" });
+
+      const product = await storage.getProduct(id);
+      if (!product) return res.status(404).json({ message: "Product not found" });
+
+      const prompt = `You are a product composition expert. Based on the product information below, generate a realistic ingredients and chemical analysis.
+
+Product Name: ${product.name}
+Brand: ${product.brand}
+Description: ${product.description}
+
+Return ONLY a valid JSON object with this exact structure — no markdown, no explanation:
+{
+  "ingredients": [
+    { "name": "string", "percentage": number }
+  ],
+  "chemicals": [
+    { "name": "string", "percentage": number, "safety": "Safe" | "Warning" | "Harmful" }
+  ]
+}
+
+Rules:
+- Provide 5–8 ingredients relevant to this product type. Percentages must add up to approximately 100.
+- Provide 4–6 chemicals commonly found in this product type.
+- For "safety": use "Safe" for benign/natural ingredients, "Warning" for moderate-concern chemicals, "Harmful" for potentially hazardous ones.
+- Make the data realistic and appropriate for the specific product type (food, cosmetic, electronic, clothing, etc.).
+- Ingredient and chemical names in English.`;
+
+      const aiRes = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+        max_tokens: 600,
+      });
+
+      const raw = aiRes.choices[0]?.message?.content ?? "{}";
+      const parsed = JSON.parse(raw);
+
+      const ingredientsSchema = z.object({
+        ingredients: z.array(z.object({ name: z.string(), percentage: z.number() })),
+        chemicals: z.array(z.object({ name: z.string(), percentage: z.number(), safety: z.enum(["Safe", "Warning", "Harmful"]) })),
+      });
+
+      const result = ingredientsSchema.parse(parsed);
+      res.json(result);
+    } catch (err) {
+      console.error("Ingredients analysis error:", err);
+      res.status(500).json({ message: "Failed to analyze ingredients" });
+    }
+  });
+
   return httpServer;
 }
 
