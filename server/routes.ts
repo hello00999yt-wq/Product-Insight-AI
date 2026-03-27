@@ -5,10 +5,16 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
+function getOpenAIClient() {
+  const apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OpenAI API key is not configured. Please set OPENAI_API_KEY.");
+  }
+  return new OpenAI({
+    apiKey,
+    baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  });
+}
 
 export async function registerRoutes(
   httpServer: Server,
@@ -56,7 +62,7 @@ export async function registerRoutes(
       const respondLang = langNames[lang ?? "en"] ?? "English";
 
       // ── Pre-check: is this the BACK side of a product? ──
-      const sideCheck = await openai.chat.completions.create({
+      const sideCheck = await getOpenAIClient().chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {
@@ -97,7 +103,7 @@ Respond ONLY with valid JSON — exactly one of:
       }
 
       // Analyze the image using OpenAI Vision
-      const response = await openai.chat.completions.create({
+      const response = await getOpenAIClient().chat.completions.create({
         model: "gpt-5.1",
         messages: [
           {
@@ -180,7 +186,7 @@ Respond ONLY with valid JSON — exactly one of:
       };
       const respondLang = langNames[lang] || "English";
 
-      const response = await openai.chat.completions.create({
+      const response = await getOpenAIClient().chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {
@@ -256,7 +262,7 @@ Rules:
 - Make the data realistic and appropriate for the specific product type (food, cosmetic, electronic, clothing, etc.).
 - Ingredient and chemical names in English.`;
 
-      const aiRes = await openai.chat.completions.create({
+      const aiRes = await getOpenAIClient().chat.completions.create({
         model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_object" },
