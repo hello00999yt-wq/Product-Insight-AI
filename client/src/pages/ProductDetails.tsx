@@ -115,6 +115,11 @@ export default function ProductDetails() {
 
             <Separator />
 
+            {/* Ingredients & Chemical Analysis */}
+            <IngredientsAndChemicals productId={id} />
+
+            <Separator />
+
             {/* Authenticity Check */}
             <div>
               <div className="flex items-center gap-2 mb-4">
@@ -158,8 +163,6 @@ export default function ProductDetails() {
           </div>
         </motion.div>
 
-        {/* ── Ingredients & Chemical Analysis ── */}
-        <IngredientsAndChemicals productId={id} />
       </main>
     </div>
   );
