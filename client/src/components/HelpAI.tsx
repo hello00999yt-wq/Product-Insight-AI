@@ -1,11 +1,19 @@
 import { useState, useRef, useEffect, useCallback, Fragment } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Bot, Loader2, Volume2, VolumeX } from "lucide-react";
+import { X, Send, Bot, Loader2, Volume2, VolumeX, Plus, ImageIcon, VideoIcon, XCircle } from "lucide-react";
 import { useLang } from "@/context/LanguageContext";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+  mediaUrl?: string;
+  mediaType?: "image" | "video";
+}
+
+interface PendingMedia {
+  dataUrl: string;
+  type: "image" | "video";
+  name: string;
 }
 
 const LANG_VOICE_MAP: Record<string, string> = {
@@ -19,46 +27,57 @@ export default function HelpAI() {
     t("ai.quick1"), t("ai.quick2"), t("ai.quick3"), t("ai.quick4"),
   ];
 
-  const [isOpen, setIsOpen]         = useState(false);
-  const [messages, setMessages]     = useState<Message[]>([{ role: "assistant", content: t("ai.welcome") }]);
-  const [input, setInput]           = useState("");
-  const [isLoading, setIsLoading]   = useState(false);
+  const [isOpen, setIsOpen]           = useState(false);
+  const [messages, setMessages]       = useState<Message[]>([{ role: "assistant", content: t("ai.welcome") }]);
+  const [input, setInput]             = useState("");
+  const [isLoading, setIsLoading]     = useState(false);
   const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
-  const [ttsSupported]              = useState(() => "speechSynthesis" in window);
+  const [ttsSupported]                = useState(() => "speechSynthesis" in window);
+  const [attachMenu, setAttachMenu]   = useState(false);
+  const [pendingMedia, setPendingMedia] = useState<PendingMedia | null>(null);
+
   const messagesEndRef  = useRef<HTMLDivElement>(null);
   const inputRef        = useRef<HTMLInputElement>(null);
   const utteranceRef    = useRef<SpeechSynthesisUtterance | null>(null);
+  const imageInputRef   = useRef<HTMLInputElement>(null);
+  const videoInputRef   = useRef<HTMLInputElement>(null);
+  const attachMenuRef   = useRef<HTMLDivElement>(null);
 
-  /* ── Scroll to bottom on new message ── */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  /* ── Focus input on open ── */
   useEffect(() => {
     if (isOpen) setTimeout(() => inputRef.current?.focus(), 300);
   }, [isOpen]);
 
-  /* ── Open via custom event (from inline button) ── */
   useEffect(() => {
     const handler = () => setIsOpen(true);
     window.addEventListener("openHelpAI", handler);
     return () => window.removeEventListener("openHelpAI", handler);
   }, []);
 
-  /* ── Reset welcome message & stop speech on lang change ── */
   useEffect(() => {
     stopSpeaking();
     setMessages([{ role: "assistant", content: t("ai.welcome") }]);
   }, [lang]);
 
-  /* ── Stop speech when chat is closed ── */
   useEffect(() => {
     if (!isOpen) stopSpeaking();
   }, [isOpen]);
 
-  /* ── Stop speech on unmount ── */
   useEffect(() => () => stopSpeaking(), []);
+
+  /* ── Close attach menu when clicking outside ── */
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (attachMenuRef.current && !attachMenuRef.current.contains(e.target as Node)) {
+        setAttachMenu(false);
+      }
+    };
+    if (attachMenu) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [attachMenu]);
 
   /* ── TTS helpers ── */
   const stopSpeaking = useCallback(() => {
@@ -77,33 +96,23 @@ export default function HelpAI() {
     const targetLangCode = targetBCP47.split("-")[0];
 
     utterance.lang   = targetBCP47;
-    utterance.rate   = 1;      // normal speed — clear and natural
-    utterance.pitch  = 1;      // neutral pitch
-    utterance.volume = 1;      // full volume
+    utterance.rate   = 1;
+    utterance.pitch  = 1;
+    utterance.volume = 1;
 
-    /* Voice selection priority:
-       1. Google voice for exact language  (e.g. "Google हिन्दी")
-       2. Any voice for exact language
-       3. Google voice for language family  (e.g. "Google UK English")
-       4. Any voice for language family
-       5. Google English fallback
-       6. Any English fallback
-    */
     const pickVoice = () => {
       const voices = window.speechSynthesis.getVoices();
-      const isGoogle = (v: SpeechSynthesisVoice) =>
-        v.name.toLowerCase().includes("google");
+      const isGoogle = (v: SpeechSynthesisVoice) => v.name.toLowerCase().includes("google");
 
       const matched =
-        voices.find((v) => v.lang === targetBCP47 && isGoogle(v))          ||
-        voices.find((v) => v.lang === targetBCP47)                          ||
+        voices.find((v) => v.lang === targetBCP47 && isGoogle(v))           ||
+        voices.find((v) => v.lang === targetBCP47)                           ||
         voices.find((v) => v.lang.startsWith(targetLangCode) && isGoogle(v))||
-        voices.find((v) => v.lang.startsWith(targetLangCode))               ||
-        voices.find((v) => v.lang.startsWith("en") && isGoogle(v))          ||
+        voices.find((v) => v.lang.startsWith(targetLangCode))                ||
+        voices.find((v) => v.lang.startsWith("en") && isGoogle(v))           ||
         voices.find((v) => v.lang.startsWith("en"));
 
       if (matched) utterance.voice = matched;
-
       utterance.onend   = () => setSpeakingIdx(null);
       utterance.onerror = () => setSpeakingIdx(null);
       utteranceRef.current = utterance;
@@ -117,15 +126,39 @@ export default function HelpAI() {
     }
   }, [lang, ttsSupported]);
 
-  /* ── Send message ── */
-  const sendMessage = async (text: string) => {
-    if (!text.trim() || isLoading) return;
-    stopSpeaking();
+  /* ── File pick handler ── */
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>, type: "image" | "video") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAttachMenu(false);
 
-    const userMsg: Message = { role: "user", content: text };
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPendingMedia({ dataUrl: reader.result as string, type, name: file.name });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }, []);
+
+  /* ── Send message ── */
+  const sendMessage = async (text: string, media?: PendingMedia) => {
+    const hasText  = text.trim().length > 0;
+    const hasMedia = !!media;
+    if ((!hasText && !hasMedia) || isLoading) return;
+
+    stopSpeaking();
+    setPendingMedia(null);
+    setInput("");
+
+    const userMsg: Message = {
+      role: "user",
+      content: hasText ? text : (media!.type === "image" ? "What can you see in this image?" : `I uploaded a video: ${media!.name}`),
+      ...(hasMedia && media!.type === "image"  ? { mediaUrl: media!.dataUrl, mediaType: "image"  } : {}),
+      ...(hasMedia && media!.type === "video"  ? { mediaUrl: media!.dataUrl, mediaType: "video"  } : {}),
+    };
+
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
-    setInput("");
     setIsLoading(true);
 
     try {
@@ -133,16 +166,20 @@ export default function HelpAI() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
+          messages: newMessages.map((m) => ({
+            role: m.role,
+            content: m.content,
+            mediaUrl:  m.mediaType === "image" ? m.mediaUrl : undefined,
+            mediaType: m.mediaType,
+          })),
           lang,
         }),
       });
-      const data = await res.json();
+      const data  = await res.json();
       const reply = data.message as string;
 
       setMessages((prev) => {
         const updated = [...prev, { role: "assistant" as const, content: reply }];
-        /* Auto-speak immediately after React renders the new message */
         setTimeout(() => speak(reply, updated.length - 1), 0);
         return updated;
       });
@@ -158,8 +195,28 @@ export default function HelpAI() {
     }
   };
 
+  const canSend = (input.trim().length > 0 || !!pendingMedia) && !isLoading;
+
   return (
     <>
+      {/* Hidden file inputs */}
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/jpeg,image/png"
+        className="hidden"
+        onChange={(e) => handleFileChange(e, "image")}
+        data-testid="input-image-upload"
+      />
+      <input
+        ref={videoInputRef}
+        type="file"
+        accept="video/mp4"
+        className="hidden"
+        onChange={(e) => handleFileChange(e, "video")}
+        data-testid="input-video-upload"
+      />
+
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -193,7 +250,6 @@ export default function HelpAI() {
               </div>
 
               <div className="flex items-center gap-2">
-                {/* Global mute / stop speaking button */}
                 {ttsSupported && speakingIdx !== null && (
                   <motion.button
                     initial={{ scale: 0 }}
@@ -225,7 +281,6 @@ export default function HelpAI() {
                   animate={{ opacity: 1, y: 0 }}
                   className={`flex items-end gap-1 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  {/* Bot avatar */}
                   {msg.role === "assistant" && (
                     <div
                       className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mb-0.5"
@@ -235,8 +290,29 @@ export default function HelpAI() {
                     </div>
                   )}
 
-                  {/* Bubble + speaker */}
                   <div className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"} max-w-[78%]`}>
+                    {/* Media preview inside bubble */}
+                    {msg.mediaType === "image" && msg.mediaUrl && (
+                      <div className="mb-1 rounded-2xl overflow-hidden" style={{ maxWidth: "200px" }}>
+                        <img
+                          src={msg.mediaUrl}
+                          alt="uploaded"
+                          className="w-full object-cover rounded-2xl"
+                          style={{ maxHeight: "160px" }}
+                        />
+                      </div>
+                    )}
+                    {msg.mediaType === "video" && msg.mediaUrl && (
+                      <div className="mb-1 rounded-2xl overflow-hidden" style={{ maxWidth: "200px" }}>
+                        <video
+                          src={msg.mediaUrl}
+                          controls
+                          className="w-full rounded-2xl"
+                          style={{ maxHeight: "160px" }}
+                        />
+                      </div>
+                    )}
+
                     <div
                       className="px-4 py-2.5 rounded-2xl text-sm leading-relaxed"
                       style={
@@ -250,13 +326,10 @@ export default function HelpAI() {
                         : msg.content}
                     </div>
 
-                    {/* Speaker replay button — only for assistant messages */}
                     {msg.role === "assistant" && ttsSupported && (
                       <motion.button
                         data-testid={`button-tts-${i}`}
-                        onClick={() =>
-                          speakingIdx === i ? stopSpeaking() : speak(msg.content, i)
-                        }
+                        onClick={() => speakingIdx === i ? stopSpeaking() : speak(msg.content, i)}
                         whileTap={{ scale: 0.9 }}
                         className="mt-1 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium transition-all"
                         style={{
@@ -267,15 +340,9 @@ export default function HelpAI() {
                         title={speakingIdx === i ? "Stop" : "Play aloud"}
                       >
                         {speakingIdx === i ? (
-                          <>
-                            <SpeakingWave />
-                            <span style={{ color: "#00ff88" }}>Stop</span>
-                          </>
+                          <><SpeakingWave /><span style={{ color: "#00ff88" }}>Stop</span></>
                         ) : (
-                          <>
-                            <Volume2 className="w-3 h-3" />
-                            <span>Play</span>
-                          </>
+                          <><Volume2 className="w-3 h-3" /><span>Play</span></>
                         )}
                       </motion.button>
                     )}
@@ -285,11 +352,7 @@ export default function HelpAI() {
 
               {/* Typing indicator */}
               {isLoading && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex items-center gap-2"
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
                   <div
                     className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
                     style={{ background: "#00ff8820", border: "1px solid #00ff8840" }}
@@ -333,38 +396,167 @@ export default function HelpAI() {
               </div>
             )}
 
-            {/* ── Input ── */}
+            {/* ── Pending media preview strip ── */}
+            <AnimatePresence>
+              {pendingMedia && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="px-4 pb-2 flex-shrink-0"
+                >
+                  <div
+                    className="relative inline-flex items-center gap-2 rounded-xl px-3 py-2"
+                    style={{ background: "#1a1a1a", border: "1px solid #00ff8840" }}
+                  >
+                    {pendingMedia.type === "image" ? (
+                      <img
+                        src={pendingMedia.dataUrl}
+                        alt="preview"
+                        className="w-12 h-12 object-cover rounded-lg"
+                      />
+                    ) : (
+                      <div
+                        className="w-12 h-12 rounded-lg flex items-center justify-center"
+                        style={{ background: "#00ff8815" }}
+                      >
+                        <VideoIcon className="w-5 h-5" style={{ color: "#00ff88" }} />
+                      </div>
+                    )}
+                    <div className="flex flex-col">
+                      <span className="text-xs font-medium" style={{ color: "#e0e0e0" }}>
+                        {pendingMedia.type === "image" ? "Image" : "Video"}
+                      </span>
+                      <span className="text-xs max-w-[120px] truncate" style={{ color: "#666" }}>
+                        {pendingMedia.name}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setPendingMedia(null)}
+                      className="ml-1 w-5 h-5 rounded-full flex items-center justify-center hover:opacity-70 transition-opacity"
+                      data-testid="button-remove-media"
+                    >
+                      <XCircle className="w-4 h-4" style={{ color: "#666" }} />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* ── Input area ── */}
             <div className="px-4 py-3 flex-shrink-0" style={{ borderTop: "1px solid #00ff8820" }}>
               <div
                 className="flex items-center gap-2 rounded-xl px-3 py-2"
                 style={{ background: "#1a1a1a", border: "1px solid #00ff8830" }}
               >
+                {/* "+" attach button with dropdown */}
+                <div className="relative flex-shrink-0" ref={attachMenuRef}>
+                  <button
+                    data-testid="button-attach"
+                    onClick={() => setAttachMenu((v) => !v)}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+                    style={{
+                      background: attachMenu ? "#00ff8820" : "transparent",
+                      border: `1px solid ${attachMenu ? "#00ff8860" : "#333"}`,
+                      color: attachMenu ? "#00ff88" : "#666",
+                    }}
+                    title="Attach file"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+
+                  {/* Dropdown menu */}
+                  <AnimatePresence>
+                    {attachMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: 8 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 8 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute bottom-full mb-2 left-0 rounded-xl overflow-hidden z-10"
+                        style={{
+                          background: "#1a1a1a",
+                          border: "1px solid #00ff8840",
+                          boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+                          minWidth: "150px",
+                        }}
+                      >
+                        <button
+                          data-testid="button-upload-image"
+                          onClick={() => { setAttachMenu(false); imageInputRef.current?.click(); }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors"
+                          style={{ color: "#e0e0e0" }}
+                          onMouseOver={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#00ff8812"; }}
+                          onMouseOut={(e)  => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+                        >
+                          <div
+                            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                            style={{ background: "#00ff8815" }}
+                          >
+                            <ImageIcon className="w-4 h-4" style={{ color: "#00ff88" }} />
+                          </div>
+                          <span>Upload Image</span>
+                        </button>
+
+                        <div style={{ height: "1px", background: "#00ff8815" }} />
+
+                        <button
+                          data-testid="button-upload-video"
+                          onClick={() => { setAttachMenu(false); videoInputRef.current?.click(); }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors"
+                          style={{ color: "#e0e0e0" }}
+                          onMouseOver={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#00ff8812"; }}
+                          onMouseOut={(e)  => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+                        >
+                          <div
+                            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                            style={{ background: "#00ff8815" }}
+                          >
+                            <VideoIcon className="w-4 h-4" style={{ color: "#00ff88" }} />
+                          </div>
+                          <span>Upload Video</span>
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Text input */}
                 <input
                   ref={inputRef}
                   data-testid="input-chat"
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
+                  onKeyDown={(e) => e.key === "Enter" && sendMessage(input, pendingMedia ?? undefined)}
                   placeholder={t("ai.placeholder")}
                   className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-600"
                   style={{ color: "#e0e0e0" }}
                 />
+
+                {/* Send button */}
                 <button
                   data-testid="button-send-chat"
-                  onClick={() => sendMessage(input)}
-                  disabled={!input.trim() || isLoading}
+                  onClick={() => sendMessage(input, pendingMedia ?? undefined)}
+                  disabled={!canSend}
                   className="w-8 h-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-40"
                   style={{
-                    background: input.trim() && !isLoading ? "linear-gradient(135deg,#00ff88,#00cc6a)" : "#1a1a1a",
+                    background: canSend ? "linear-gradient(135deg,#00ff88,#00cc6a)" : "#1a1a1a",
                   }}
                 >
                   {isLoading
                     ? <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                    : <Send className="w-4 h-4" style={{ color: input.trim() ? "#000" : "#555" }} />
+                    : <Send className="w-4 h-4" style={{ color: canSend ? "#000" : "#555" }} />
                   }
                 </button>
               </div>
+
+              {/* Supported formats hint */}
+              {attachMenu === false && !pendingMedia && (
+                <p className="text-center text-xs mt-1.5" style={{ color: "#444" }}>
+                  JPG, PNG, MP4 supported
+                </p>
+              )}
 
               {/* TTS indicator bar */}
               {ttsSupported && speakingIdx !== null && (
@@ -392,12 +584,7 @@ export default function HelpAI() {
   );
 }
 
-/* ── Formatted message renderer ──
-   Handles:
-   • \n  → line break with spacing
-   • **text** → highlighted bold span
-   • bullet lines (•  -  *  or 1.) → indented bullet row
-*/
+/* ── Formatted message renderer ── */
 function FormattedMessage({ text }: { text: string }) {
   const lines = text.split("\n");
 
@@ -440,22 +627,14 @@ function FormattedMessage({ text }: { text: string }) {
         }
 
         if (isBullet(line)) {
-          const clean = line.replace(/^(\s*[•\-\*]|\s*\d+[.)]) ?/, "").trimStart();
+          const clean  = line.replace(/^(\s*[•\-\*]|\s*\d+[.)]) ?/, "").trimStart();
           const marker = line.match(/^(\s*[•\-\*]|\s*(\d+)[.)]) ?/)?.[0]?.trim() ?? "•";
           return (
             <div
               key={i}
               style={{ display: "flex", alignItems: "flex-start", gap: "7px", lineHeight: 1.5 }}
             >
-              <span
-                style={{
-                  flexShrink: 0,
-                  color: "#00ff88",
-                  fontWeight: 700,
-                  marginTop: "1px",
-                  fontSize: "0.8em",
-                }}
-              >
+              <span style={{ flexShrink: 0, color: "#00ff88", fontWeight: 700, marginTop: "1px", fontSize: "0.8em" }}>
                 {marker}
               </span>
               <span>{renderInline(clean, i)}</span>

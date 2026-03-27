@@ -186,6 +186,19 @@ Respond ONLY with valid JSON — exactly one of:
       };
       const respondLang = langNames[lang] || "English";
 
+      const formattedMessages = messages.map((m: any) => {
+        if (m.mediaUrl && m.mediaType === "image") {
+          return {
+            role: m.role,
+            content: [
+              { type: "image_url", image_url: { url: m.mediaUrl } },
+              { type: "text", text: m.content || "What can you tell me about this product image? Is it real or fake?" },
+            ],
+          };
+        }
+        return { role: m.role, content: m.content };
+      });
+
       const response = await getOpenAIClient().chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
@@ -201,6 +214,7 @@ Your purpose is to help users with:
 - Product safety tips
 - Consumer protection advice
 - How to use the platform (upload a product image to get instant analysis)
+- Analyzing product images shared by users to detect authenticity
 
 Be friendly, concise, and helpful. Use simple language. If someone asks about a specific product, give them practical fake-detection tips. Always encourage users to upload a product image for AI-powered analysis.
 
@@ -213,7 +227,7 @@ FORMATTING RULES — follow these strictly:
 
 IMPORTANT: You MUST always respond in ${respondLang} language only, regardless of what language the user writes in. All your responses must be in ${respondLang}.`
           },
-          ...messages
+          ...formattedMessages
         ],
         max_tokens: 500,
       });
