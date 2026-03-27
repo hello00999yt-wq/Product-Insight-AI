@@ -49,6 +49,47 @@ export async function registerRoutes(
     try {
       const { image } = api.products.analyze.input.parse(req.body);
 
+      // ── Pre-check: is this the BACK side of a product? ──
+      const sideCheck = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: `Look at this image carefully. Determine whether it shows the BACK / INFORMATION side of a physical product package (box, bottle, packet, sachet, wrapper, etc.).
+
+The BACK side typically contains any of these: barcode, QR code, ingredients list, nutritional facts, manufacturing info, expiry date, batch number, legal / regulatory text, product description text, MRP price details, or usage instructions.
+
+The FRONT side typically contains: large brand logo, product name in decorative font, marketing imagery, mascot, or decorative design.
+
+If the image is NOT a product package at all (e.g., a person, landscape, random object, food without packaging), respond with {"side":"front"}.
+
+Respond ONLY with valid JSON — exactly one of:
+{"side":"back"}
+{"side":"front"}`,
+              },
+              { type: "image_url", image_url: { url: image } },
+            ],
+          },
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 20,
+      });
+
+      const sideResult = JSON.parse(
+        sideCheck.choices[0]?.message?.content || '{"side":"front"}'
+      );
+
+      if (sideResult.side !== "back") {
+        return res.status(422).json({
+          code: "FRONT_SIDE_IMAGE",
+          message:
+            "Please upload the back side of the product where the QR code, barcode, or product details are visible.",
+        });
+      }
+
       // Analyze the image using OpenAI Vision
       const response = await openai.chat.completions.create({
         model: "gpt-5.1",

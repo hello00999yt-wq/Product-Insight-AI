@@ -31,6 +31,14 @@ export function useProduct(id: number) {
   });
 }
 
+export class ApiError extends Error {
+  code?: string;
+  constructor(message: string, code?: string) {
+    super(message);
+    this.code = code;
+  }
+}
+
 // POST /api/products/analyze
 export function useAnalyzeProduct() {
   const queryClient = useQueryClient();
@@ -48,7 +56,10 @@ export function useAnalyzeProduct() {
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to analyze product");
+        throw new ApiError(
+          errorData.message || "Failed to analyze product",
+          errorData.code
+        );
       }
 
       return api.products.analyze.responses[200].parse(await res.json());

@@ -2,20 +2,23 @@ import { useState } from "react";
 import { useLocation, Link } from "wouter";
 import { ImageUploader } from "@/components/ImageUploader";
 import { ProductCard } from "@/components/ProductCard";
-import { useProducts, useAnalyzeProduct } from "@/hooks/use-products";
+import { FrontSideAlert } from "@/components/FrontSideAlert";
+import { useProducts, useAnalyzeProduct, ApiError } from "@/hooks/use-products";
 import { Scan, ShieldCheck, Zap, History, Flag, MapPin, Star, ArrowRight, Upload, MessageCircle } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/context/LanguageContext";
 
 export default function Home() {
   const [, setLocation] = useLocation();
   const { data: history, isLoading: isHistoryLoading } = useProducts();
   const { mutate: analyze, isPending: isAnalyzing } = useAnalyzeProduct();
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError]           = useState<string | null>(null);
+  const [isFrontSide, setIsFrontSide] = useState(false);
   const { t } = useLang();
 
   const handleImageSelected = (base64: string) => {
     setError(null);
+    setIsFrontSide(false);
     analyze(
       { image: base64 },
       {
@@ -23,8 +26,12 @@ export default function Home() {
           setLocation(`/product/${product.id}`);
         },
         onError: (err) => {
-          setError(err.message || "Failed to analyze image. Please try again.");
-        }
+          if (err instanceof ApiError && err.code === "FRONT_SIDE_IMAGE") {
+            setIsFrontSide(true);
+          } else {
+            setError(err.message || "Failed to analyze image. Please try again.");
+          }
+        },
       }
     );
   };
@@ -62,15 +69,26 @@ export default function Home() {
             onImageSelected={handleImageSelected}
             isAnalyzing={isAnalyzing}
           />
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-6 p-4 bg-destructive/10 text-destructive text-center rounded-xl border border-destructive/20 max-w-md mx-auto"
-            >
-              {error}
-            </motion.div>
-          )}
+          <AnimatePresence mode="wait">
+            {isFrontSide && (
+              <FrontSideAlert
+                key="front-side-alert"
+                onDismiss={() => setIsFrontSide(false)}
+                onTryAgain={() => setIsFrontSide(false)}
+              />
+            )}
+            {error && !isFrontSide && (
+              <motion.div
+                key="general-error"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                className="mt-6 p-4 bg-destructive/10 text-destructive text-center rounded-xl border border-destructive/20 max-w-md mx-auto"
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </section>
 
         {/* Inline Help AI CTA */}
