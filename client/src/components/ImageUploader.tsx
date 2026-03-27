@@ -59,7 +59,7 @@ export function ImageUploader({ onImageSelected, isAnalyzing }: ImageUploaderPro
                   {isDragActive ? "Drop it here!" : "Upload Product Image"}
                 </h3>
                 <p className="mt-2 text-muted-foreground text-sm max-w-xs mx-auto">
-                  Drag & drop or click to select a photo of the product you want to verify.
+                  Please upload the back side image of the product where QR code, barcode, or product details are visible.
                 </p>
               </div>
             </div>
