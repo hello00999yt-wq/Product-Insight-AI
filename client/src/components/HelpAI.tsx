@@ -72,19 +72,36 @@ export default function HelpAI() {
     window.speechSynthesis.cancel();
     setSpeakingIdx(msgIndex);
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang  = LANG_VOICE_MAP[lang] ?? "hi-IN";
-    utterance.rate  = 0.92;
-    utterance.pitch = 1.05;
+    const utterance      = new SpeechSynthesisUtterance(text);
+    const targetBCP47    = LANG_VOICE_MAP[lang] ?? "en-US";
+    const targetLangCode = targetBCP47.split("-")[0];
 
-    /* Pick the best matching voice, fall back to en-US */
-    const setVoiceAndSpeak = () => {
+    utterance.lang   = targetBCP47;
+    utterance.rate   = 1;      // normal speed — clear and natural
+    utterance.pitch  = 1;      // neutral pitch
+    utterance.volume = 1;      // full volume
+
+    /* Voice selection priority:
+       1. Google voice for exact language  (e.g. "Google हिन्दी")
+       2. Any voice for exact language
+       3. Google voice for language family  (e.g. "Google UK English")
+       4. Any voice for language family
+       5. Google English fallback
+       6. Any English fallback
+    */
+    const pickVoice = () => {
       const voices = window.speechSynthesis.getVoices();
-      const targetLang = (LANG_VOICE_MAP[lang] ?? "hi-IN").split("-")[0];
+      const isGoogle = (v: SpeechSynthesisVoice) =>
+        v.name.toLowerCase().includes("google");
+
       const matched =
-        voices.find((v) => v.lang === utterance.lang) ||
-        voices.find((v) => v.lang.startsWith(targetLang)) ||
+        voices.find((v) => v.lang === targetBCP47 && isGoogle(v))          ||
+        voices.find((v) => v.lang === targetBCP47)                          ||
+        voices.find((v) => v.lang.startsWith(targetLangCode) && isGoogle(v))||
+        voices.find((v) => v.lang.startsWith(targetLangCode))               ||
+        voices.find((v) => v.lang.startsWith("en") && isGoogle(v))          ||
         voices.find((v) => v.lang.startsWith("en"));
+
       if (matched) utterance.voice = matched;
 
       utterance.onend   = () => setSpeakingIdx(null);
@@ -94,9 +111,9 @@ export default function HelpAI() {
     };
 
     if (window.speechSynthesis.getVoices().length > 0) {
-      setVoiceAndSpeak();
+      pickVoice();
     } else {
-      window.speechSynthesis.addEventListener("voiceschanged", setVoiceAndSpeak, { once: true });
+      window.speechSynthesis.addEventListener("voiceschanged", pickVoice, { once: true });
     }
   }, [lang, ttsSupported]);
 
@@ -125,15 +142,15 @@ export default function HelpAI() {
 
       setMessages((prev) => {
         const updated = [...prev, { role: "assistant" as const, content: reply }];
-        /* Auto-speak after state settles */
-        setTimeout(() => speak(reply, updated.length - 1), 80);
+        /* Auto-speak immediately after React renders the new message */
+        setTimeout(() => speak(reply, updated.length - 1), 0);
         return updated;
       });
     } catch {
       const errMsg = "Sorry, something went wrong. Please try again.";
       setMessages((prev) => {
         const updated = [...prev, { role: "assistant" as const, content: errMsg }];
-        setTimeout(() => speak(errMsg, updated.length - 1), 80);
+        setTimeout(() => speak(errMsg, updated.length - 1), 0);
         return updated;
       });
     } finally {
