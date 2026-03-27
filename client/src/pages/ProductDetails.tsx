@@ -2,6 +2,7 @@ import { useRoute, Link } from "wouter";
 import { useProduct } from "@/hooks/use-products";
 import { Loader2, ArrowLeft, Star, Share2, Info } from "lucide-react";
 import { RiskBadge } from "@/components/RiskBadge";
+import { ProductStamp } from "@/components/ProductStamp";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
@@ -76,6 +77,7 @@ export default function ProductDetails() {
                 alt={product.name}
                 className="w-full h-full object-contain p-8"
               />
+              <ProductStamp fakeRiskLevel={product.fakeRiskLevel} />
               <div className="absolute top-4 left-4">
                 <RiskBadge level={product.fakeRiskLevel} className="bg-white/90 backdrop-blur" />
               </div>

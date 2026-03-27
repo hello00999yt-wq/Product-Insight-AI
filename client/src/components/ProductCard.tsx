@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
+import { ProductStamp } from "@/components/ProductStamp";
 
 export function ProductCard({ product }: { product: Product }) {
   const isHighRisk = product.fakeRiskLevel.toLowerCase() === 'high';
@@ -10,12 +11,13 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <Link href={`/product/${product.id}`} className="block group">
       <div className="relative overflow-hidden rounded-2xl border border-blue-500/40 bg-card shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300" style={{ boxShadow: "0 0 15px rgba(59,130,246,0.1)" }}>
-        <div className="aspect-[4/3] overflow-hidden bg-muted">
+        <div className="aspect-[4/3] overflow-hidden bg-muted relative">
           <img 
             src={product.imageUrl} 
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
+          <ProductStamp fakeRiskLevel={product.fakeRiskLevel} />
           <div className="absolute top-3 right-3">
             <Badge variant={isHighRisk ? "destructive" : "secondary"} className="shadow-sm">
               {product.fakeRiskLevel} Risk
