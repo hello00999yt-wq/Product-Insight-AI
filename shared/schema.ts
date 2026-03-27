@@ -33,7 +33,8 @@ export type ProductListResponse = Product[];
 
 // For image upload and analysis
 export const analyzeProductSchema = z.object({
-  image: z.string().describe("Base64 encoded image data starting with data:image/...")
+  image: z.string().describe("Base64 encoded image data starting with data:image/..."),
+  lang: z.string().optional().default("en"),
 });
 export type AnalyzeProductRequest = z.infer<typeof analyzeProductSchema>;
 

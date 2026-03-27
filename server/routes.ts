@@ -47,7 +47,13 @@ export async function registerRoutes(
   // Analyze a product image
   app.post(api.products.analyze.path, async (req, res) => {
     try {
-      const { image } = api.products.analyze.input.parse(req.body);
+      const { image, lang } = api.products.analyze.input.parse(req.body);
+
+      const langNames: Record<string, string> = {
+        en: "English", hi: "Hindi", mr: "Marathi", gu: "Gujarati",
+        bn: "Bengali", pa: "Punjabi", te: "Telugu", ur: "Urdu",
+      };
+      const respondLang = langNames[lang ?? "en"] ?? "English";
 
       // ── Pre-check: is this the BACK side of a product? ──
       const sideCheck = await openai.chat.completions.create({
@@ -96,16 +102,20 @@ Respond ONLY with valid JSON — exactly one of:
         messages: [
           {
             role: "system",
-            content: `You are an expert product identifier and authenticator. Analyze the provided product image and return a JSON object with the following details:
+            content: `You are an expert product identifier and authenticator. Analyze the provided product image and return a JSON object with the following fields:
             - name: The specific name of the product.
-            - brand: The brand of the product.
+            - brand: The brand name of the product (keep brand names in their original script, e.g. "Nike", "Rolex").
             - description: A brief, detailed description of the product.
-            - mrp: The typical Maximum Retail Price (format as a string, e.g., "$120.00").
-            - marketPrice: The average current market price or street value (format as a string, e.g., "$95.00").
-            - fakeRiskLevel: Estimate the risk of encountering fakes for this specific product or brand. Must be exactly one of: "Low", "Medium", or "High".
-            - identificationTips: An array of strings, each being a specific tip on how to differentiate a genuine version of this product from a counterfeit.
-            
-            Be as accurate as possible based on the visual information. If you cannot identify the exact product, provide details for the closest match or general product category. Ensure the response is valid JSON.`
+            - mrp: The typical Maximum Retail Price (format as a string with currency symbol, e.g. "₹120.00" or "$95.00").
+            - marketPrice: The average current market price or street value (same format as mrp).
+            - fakeRiskLevel: Estimate the risk of encountering fakes. Must be EXACTLY one of these English words: "Low", "Medium", or "High". Never translate this value.
+            - identificationTips: An array of strings, each being a practical tip on how to differentiate a genuine product from a counterfeit.
+
+            LANGUAGE RULE — CRITICAL:
+            You MUST write the values of "name", "description", and every string inside "identificationTips" in ${respondLang} language.
+            The fields "brand", "mrp", "marketPrice", and "fakeRiskLevel" must remain as-is (brand in original script, prices with symbols, fakeRiskLevel in English only).
+
+            Be as accurate as possible. If you cannot identify the exact product, use the closest match. Return valid JSON only.`
           },
           {
             role: "user",

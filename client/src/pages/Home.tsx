@@ -14,13 +14,13 @@ export default function Home() {
   const { mutate: analyze, isPending: isAnalyzing } = useAnalyzeProduct();
   const [error, setError]           = useState<string | null>(null);
   const [isFrontSide, setIsFrontSide] = useState(false);
-  const { t } = useLang();
+  const { t, lang } = useLang();
 
   const handleImageSelected = (base64: string) => {
     setError(null);
     setIsFrontSide(false);
     analyze(
-      { image: base64 },
+      { image: base64, lang },
       {
         onSuccess: (product) => {
           setLocation(`/product/${product.id}`);
