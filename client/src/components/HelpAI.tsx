@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Fragment } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Bot, Loader2, Volume2, VolumeX } from "lucide-react";
 import { useLang } from "@/context/LanguageContext";
@@ -228,7 +228,9 @@ export default function HelpAI() {
                           : { background: "#1a1a1a", color: "#e0e0e0", border: "1px solid #00ff8820", borderBottomLeftRadius: "4px" }
                       }
                     >
-                      {msg.content}
+                      {msg.role === "assistant"
+                        ? <FormattedMessage text={msg.content} />
+                        : msg.content}
                     </div>
 
                     {/* Speaker replay button — only for assistant messages */}
@@ -370,6 +372,87 @@ export default function HelpAI() {
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+/* ── Formatted message renderer ──
+   Handles:
+   • \n  → line break with spacing
+   • **text** → highlighted bold span
+   • bullet lines (•  -  *  or 1.) → indented bullet row
+*/
+function FormattedMessage({ text }: { text: string }) {
+  const lines = text.split("\n");
+
+  const isBullet = (line: string) =>
+    /^(\s*[•\-\*]|\s*\d+[.)]) /.test(line);
+
+  const renderInline = (line: string, key: number) => {
+    const parts = line.split(/(\*\*[^*]+\*\*)/g);
+    return (
+      <Fragment key={key}>
+        {parts.map((part, j) => {
+          if (part.startsWith("**") && part.endsWith("**")) {
+            const inner = part.slice(2, -2);
+            return (
+              <strong
+                key={j}
+                style={{
+                  color: "#00ff88",
+                  fontWeight: 700,
+                  background: "rgba(0,255,136,0.1)",
+                  borderRadius: "3px",
+                  padding: "0 3px",
+                }}
+              >
+                {inner}
+              </strong>
+            );
+          }
+          return <span key={j}>{part}</span>;
+        })}
+      </Fragment>
+    );
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+      {lines.map((line, i) => {
+        if (line.trim() === "") {
+          return <div key={i} style={{ height: "6px" }} />;
+        }
+
+        if (isBullet(line)) {
+          const clean = line.replace(/^(\s*[•\-\*]|\s*\d+[.)]) ?/, "").trimStart();
+          const marker = line.match(/^(\s*[•\-\*]|\s*(\d+)[.)]) ?/)?.[0]?.trim() ?? "•";
+          return (
+            <div
+              key={i}
+              style={{ display: "flex", alignItems: "flex-start", gap: "7px", lineHeight: 1.5 }}
+            >
+              <span
+                style={{
+                  flexShrink: 0,
+                  color: "#00ff88",
+                  fontWeight: 700,
+                  marginTop: "1px",
+                  fontSize: "0.8em",
+                }}
+              >
+                {marker}
+              </span>
+              <span>{renderInline(clean, i)}</span>
+            </div>
+          );
+        }
+
+        return (
+          <div key={i} style={{ lineHeight: 1.55 }}>
+            {renderInline(line, i)}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
