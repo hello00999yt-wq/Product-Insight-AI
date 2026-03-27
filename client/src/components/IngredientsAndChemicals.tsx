@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
 import { Beaker, Leaf, AlertTriangle, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useProductIngredients, type Chemical } from "@/hooks/use-products";
+import { useLang } from "@/context/LanguageContext";
 
 /* ── Safety config ── */
 const SAFETY_CONFIG = {
   Safe: {
-    label: "Safe",
+    labelKey: "chem.safe",
     icon: CheckCircle,
     color: "text-emerald-400",
     bg: "bg-emerald-500/10 border-emerald-500/30",
@@ -13,7 +14,7 @@ const SAFETY_CONFIG = {
     emoji: "✅",
   },
   Warning: {
-    label: "Warning",
+    labelKey: "chem.warning",
     icon: AlertTriangle,
     color: "text-amber-400",
     bg: "bg-amber-500/10 border-amber-500/30",
@@ -21,7 +22,7 @@ const SAFETY_CONFIG = {
     emoji: "⚠️",
   },
   Harmful: {
-    label: "Harmful",
+    labelKey: "chem.harmful",
     icon: XCircle,
     color: "text-red-400",
     bg: "bg-red-500/10 border-red-500/30",
@@ -83,7 +84,8 @@ function ChemicalRow({
   percentage,
   safety,
   index,
-}: Chemical & { index: number }) {
+  t,
+}: Chemical & { index: number; t: (key: string) => string }) {
   const cfg = SAFETY_CONFIG[safety];
   const Icon = cfg.icon;
 
@@ -106,7 +108,7 @@ function ChemicalRow({
             className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${cfg.bg} ${cfg.color}`}
             data-testid={`chemical-safety-${index}`}
           >
-            {cfg.emoji} {cfg.label}
+            {cfg.emoji} {t(cfg.labelKey)}
           </span>
         </div>
       </div>
@@ -125,6 +127,7 @@ function ChemicalRow({
 /* ── Main export ── */
 export function IngredientsAndChemicals({ productId }: { productId: number }) {
   const { data, isLoading, isError } = useProductIngredients(productId);
+  const { t } = useLang();
 
   if (isError) return null;
 
@@ -144,8 +147,8 @@ export function IngredientsAndChemicals({ productId }: { productId: number }) {
             <Leaf className="w-5 h-5 text-blue-400" />
           </div>
           <div>
-            <h2 className="font-bold text-foreground text-lg leading-tight">Ingredients Analysis</h2>
-            <p className="text-xs text-muted-foreground">Composition breakdown by percentage</p>
+            <h2 className="font-bold text-foreground text-lg leading-tight">{t("ing.title")}</h2>
+            <p className="text-xs text-muted-foreground">{t("ing.subtitle")}</p>
           </div>
           {isLoading && <Loader2 className="w-4 h-4 text-muted-foreground animate-spin ml-auto" />}
         </div>
@@ -167,8 +170,8 @@ export function IngredientsAndChemicals({ productId }: { productId: number }) {
             <Beaker className="w-5 h-5 text-violet-400" />
           </div>
           <div>
-            <h2 className="font-bold text-foreground text-lg leading-tight">Chemical Detection</h2>
-            <p className="text-xs text-muted-foreground">Safety classification per compound</p>
+            <h2 className="font-bold text-foreground text-lg leading-tight">{t("chem.title")}</h2>
+            <p className="text-xs text-muted-foreground">{t("chem.subtitle")}</p>
           </div>
           {isLoading && <Loader2 className="w-4 h-4 text-muted-foreground animate-spin ml-auto" />}
         </div>
@@ -177,16 +180,16 @@ export function IngredientsAndChemicals({ productId }: { productId: number }) {
           {isLoading
             ? Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
             : data?.chemicals.map((chem, i) => (
-                <ChemicalRow key={chem.name} {...chem} index={i} />
+                <ChemicalRow key={chem.name} {...chem} index={i} t={t} />
               ))}
         </div>
 
         {!isLoading && data && (
           <div className="px-5 pb-5">
             <div className="flex items-center justify-center gap-6 p-3 rounded-xl bg-muted/30 border border-white/5 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Safe</span>
-              <span className="flex items-center gap-1.5"><AlertTriangle className="w-3.5 h-3.5 text-amber-400" /> Warning</span>
-              <span className="flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5 text-red-400" /> Harmful</span>
+              <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> {t("chem.safe")}</span>
+              <span className="flex items-center gap-1.5"><AlertTriangle className="w-3.5 h-3.5 text-amber-400" /> {t("chem.warning")}</span>
+              <span className="flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5 text-red-400" /> {t("chem.harmful")}</span>
             </div>
           </div>
         )}
