@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Upload, Star, ShieldCheck, AlertTriangle, CheckCircle2, XCircle, FileImage, Video, Receipt, Package, Search, Navigation, ExternalLink } from "lucide-react";
+import { Star, ShieldCheck, CheckCircle2, XCircle, FileImage, Video, Receipt, Package, ExternalLink } from "lucide-react";
 
 interface Report {
   id: number;
@@ -10,8 +10,6 @@ interface Report {
   complaintReason: string;
   description: string;
   rating: number;
-  lat: number;
-  lng: number;
   timestamp: string;
 }
 
@@ -96,18 +94,8 @@ function getMarkerColor(score: number): "green" | "yellow" | "red" {
   return "red";
 }
 
-const MARKER_SVG: Record<string, string> = {
-  green: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="24" height="36"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 24 12 24s12-15 12-24C24 5.4 18.6 0 12 0z" fill="#22c55e" stroke="#166534" stroke-width="1.5"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`,
-  yellow: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="24" height="36"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 24 12 24s12-15 12-24C24 5.4 18.6 0 12 0z" fill="#eab308" stroke="#854d0e" stroke-width="1.5"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`,
-  red: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="24" height="36"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 24 12 24s12-15 12-24C24 5.4 18.6 0 12 0z" fill="#ef4444" stroke="#991b1b" stroke-width="1.5"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`,
-};
-
 export default function ReportForm() {
   const [, navigate] = useLocation();
-  const mapRef = useRef<HTMLDivElement>(null);
-  const leafletMapRef = useRef<any>(null);
-  const markersLayerRef = useRef<any>(null);
-  const tempMarkerRef = useRef<any>(null);
 
   const [shopName, setShopName] = useState("");
   const [productName, setProductName] = useState("");
@@ -115,101 +103,12 @@ export default function ReportForm() {
   const [description, setDescription] = useState("");
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
-  const [selectedLat, setSelectedLat] = useState<number | null>(null);
-  const [selectedLng, setSelectedLng] = useState<number | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, File | null>>({});
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
   const [submitMessage, setSubmitMessage] = useState("");
   const [submittedReports, setSubmittedReports] = useState<Report[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-
-  useEffect(() => {
-    if (!mapRef.current || leafletMapRef.current) return;
-
-    import("leaflet").then((L) => {
-      const map = L.map(mapRef.current!, {
-        center: [20.5937, 78.9629],
-        zoom: 13,
-        zoomControl: true,
-      });
-
-      L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
-        attribution: '© <a href="https://maps.google.com">Google Maps</a>',
-        maxZoom: 20,
-        subdomains: ["mt0", "mt1", "mt2", "mt3"],
-      }).addTo(map);
-
-      const markersLayer = L.layerGroup().addTo(map);
-      markersLayerRef.current = markersLayer;
-      leafletMapRef.current = map;
-
-      map.on("click", (e: any) => {
-        const { lat, lng } = e.latlng;
-        setSelectedLat(parseFloat(lat.toFixed(4)));
-        setSelectedLng(parseFloat(lng.toFixed(4)));
-
-        if (tempMarkerRef.current) {
-          map.removeLayer(tempMarkerRef.current);
-        }
-
-        const svgIcon = L.divIcon({
-          html: `<div style="filter: drop-shadow(0 2px 6px rgba(0,255,135,0.6))">${MARKER_SVG.green}</div>`,
-          className: "",
-          iconSize: [24, 36],
-          iconAnchor: [12, 36],
-        });
-
-        tempMarkerRef.current = L.marker([lat, lng], { icon: svgIcon })
-          .addTo(map)
-          .bindPopup(`<div style="font-family:sans-serif;font-size:12px;color:#111"><b>Selected Location</b><br/>Lat: ${lat.toFixed(4)}<br/>Lng: ${lng.toFixed(4)}</div>`)
-          .openPopup();
-      });
-    });
-
-    return () => {
-      if (leafletMapRef.current) {
-        leafletMapRef.current.remove();
-        leafletMapRef.current = null;
-      }
-    };
-  }, []);
-
-  const addMarkerToMap = (report: Report, stats: ShopStats) => {
-    import("leaflet").then((L) => {
-      if (!markersLayerRef.current) return;
-
-      const color = stats.markerColor;
-      const svgIcon = L.divIcon({
-        html: `<div style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4))">${MARKER_SVG[color]}</div>`,
-        className: "",
-        iconSize: [24, 36],
-        iconAnchor: [12, 36],
-      });
-
-      const avgRating = (stats.reports.reduce((a, r) => a + r.rating, 0) / stats.reports.length).toFixed(1);
-      const badgeHtml =
-        stats.trustScore >= 80
-          ? `<div style="background:#22c55e;color:white;padding:2px 6px;border-radius:4px;font-size:11px;margin-top:4px;display:inline-block">⭐ Trusted Seller · 🟢 Verified Shop</div>`
-          : "";
-
-      const popupHtml = `
-        <div style="font-family:sans-serif;min-width:180px;padding:4px">
-          <div style="font-weight:700;font-size:14px;color:#111;margin-bottom:4px">🏪 ${stats.shopName}</div>
-          <div style="font-size:12px;color:#444;margin-bottom:2px">📦 ${stats.productName}</div>
-          <div style="font-size:12px;color:#444">Trust Score: <b style="color:${color === "green" ? "#16a34a" : color === "yellow" ? "#ca8a04" : "#dc2626"}">${stats.trustScore}%</b></div>
-          <div style="font-size:12px;color:#444">Reports: <b>${stats.totalReports}</b></div>
-          <div style="font-size:12px;color:#444">Avg Rating: <b>${avgRating} ★</b></div>
-          ${badgeHtml}
-        </div>`;
-
-      L.marker([report.lat, report.lng], { icon: svgIcon })
-        .addTo(markersLayerRef.current)
-        .bindPopup(popupHtml);
-    });
-  };
 
   const validateReport = (): { valid: boolean; message: string } => {
     if (!shopName.trim()) return { valid: false, message: "Shop name is required." };
@@ -218,8 +117,6 @@ export default function ReportForm() {
     if (!description.trim() || description.trim().length < 10)
       return { valid: false, message: "Description must be at least 10 characters." };
     if (rating < 1 || rating > 5) return { valid: false, message: "Please provide a rating (1–5 stars)." };
-    if (selectedLat === null || selectedLng === null)
-      return { valid: false, message: "Please select the shop location on the map." };
     return { valid: true, message: "" };
   };
 
@@ -245,8 +142,6 @@ export default function ReportForm() {
       complaintReason,
       description: description.trim(),
       rating,
-      lat: selectedLat!,
-      lng: selectedLng!,
       timestamp: new Date().toLocaleString(),
     };
 
@@ -271,13 +166,6 @@ export default function ReportForm() {
     shopStatsMap[key].trustScore = calcTrustScore(shopStatsMap[key].reports);
     shopStatsMap[key].markerColor = getMarkerColor(shopStatsMap[key].trustScore);
 
-    addMarkerToMap(newReport, shopStatsMap[key]);
-
-    if (tempMarkerRef.current && leafletMapRef.current) {
-      leafletMapRef.current.removeLayer(tempMarkerRef.current);
-      tempMarkerRef.current = null;
-    }
-
     setSubmittedReports([newReport, ...submittedReports]);
     setSubmitStatus("success");
     setShowSuccessPopup(true);
@@ -293,8 +181,6 @@ export default function ReportForm() {
     setComplaintReason("");
     setDescription("");
     setRating(0);
-    setSelectedLat(null);
-    setSelectedLng(null);
     setUploadedFiles({});
     setIsSubmitting(false);
   };
@@ -303,34 +189,8 @@ export default function ReportForm() {
     setUploadedFiles((prev) => ({ ...prev, [typeId]: file }));
   };
 
-  const handleMapSearch = async (e?: React.SyntheticEvent) => {
-    if (e) e.preventDefault();
-    if (!searchQuery.trim() || !leafletMapRef.current) return;
-    setIsSearching(true);
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery + ", India")}&format=json&limit=1`,
-        { headers: { "Accept-Language": "en" } }
-      );
-      const data = await res.json();
-      if (data && data.length > 0) {
-        const { lat, lon } = data[0];
-        import("leaflet").then((L) => {
-          leafletMapRef.current.setView([parseFloat(lat), parseFloat(lon)], 16);
-        });
-      }
-    } catch (_) {}
-    setIsSearching(false);
-  };
-
   return (
     <div className="min-h-screen text-white" style={{ fontFamily: "'Outfit', 'DM Sans', sans-serif" }}>
-      {/* Inline Leaflet CSS */}
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        crossOrigin=""
-      />
 
       {/* Hero Banner */}
       <div className="relative overflow-hidden border-b border-[#8b5cf6]/20 bg-gradient-to-b from-[#120b2e] to-[#0d0b1e]">
@@ -488,78 +348,6 @@ export default function ReportForm() {
                 );
               })}
             </div>
-          </Section>
-
-          {/* ── Section 3: Map ── */}
-          <Section title="Select Shop Location on India Map" icon="📍">
-            <p className="text-gray-500 text-sm mb-3">
-              Pehle apna city/area search karein, phir map par shop location click karein.
-            </p>
-
-            {/* Search Bar */}
-            <div className="flex gap-2 mb-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleMapSearch(); } }}
-                  placeholder="Search city, area, or shop name..."
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[#1e1844] bg-[#120e30] text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#8b5cf6]/60 focus:ring-1 focus:ring-[#8b5cf6]/30"
-                  data-testid="input-map-search"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => handleMapSearch()}
-                disabled={isSearching}
-                data-testid="button-map-search"
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-60"
-                style={{ background: "linear-gradient(90deg,#8b5cf6,#3b82f6)", color: "#fff" }}
-              >
-                {isSearching ? (
-                  <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin inline-block" />
-                ) : (
-                  <Navigation className="w-4 h-4" />
-                )}
-                Go
-              </button>
-            </div>
-
-            <div
-              ref={mapRef}
-              data-testid="map-india"
-              className="w-full rounded-xl overflow-hidden border border-[#1e1844]"
-              style={{ height: "420px", zIndex: 1 }}
-            />
-            <AnimatePresence>
-              {selectedLat !== null && selectedLng !== null ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="mt-3 flex items-center gap-3 px-4 py-3 rounded-xl bg-[#8b5cf6]/10 border border-[#8b5cf6]/30"
-                >
-                  <MapPin className="w-4 h-4 text-[#a78bfa] shrink-0" />
-                  <div className="text-sm">
-                    <span className="text-gray-400 mr-2">Selected Location</span>
-                    <span className="text-[#a78bfa] font-mono font-semibold">
-                      Lat: {selectedLat} &nbsp; Lng: {selectedLng}
-                    </span>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="mt-3 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1a1a0a] border border-yellow-500/20 text-yellow-400 text-sm"
-                >
-                  <AlertTriangle className="w-4 h-4 shrink-0" />
-                  No location selected — tap on the map above
-                </motion.div>
-              )}
-            </AnimatePresence>
           </Section>
 
           {/* ── Submit Button ── */}
