@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Upload, Star, ShieldCheck, AlertTriangle, CheckCircle2, XCircle, FileImage, Video, Receipt, Package, Search, Navigation } from "lucide-react";
+import { MapPin, Upload, Star, ShieldCheck, AlertTriangle, CheckCircle2, XCircle, FileImage, Video, Receipt, Package, Search, Navigation, ExternalLink } from "lucide-react";
 
 interface Report {
   id: number;
@@ -26,13 +26,53 @@ interface ShopStats {
 }
 
 const COMPLAINT_REASONS = [
-  "Fake Product",
-  "Overpricing",
-  "Wrong MRP",
-  "Expired Product",
-  "Poor Quality",
+  "Fake Product / Duplicate Brand Product",
+  "Expired Food Product / Unsafe Food",
+  "Overcharging / MRP Violation",
+  "Online Shopping Fraud",
+  "Poor Product Quality",
+  "Wrong Product Information",
+  "Misleading Advertisement",
   "Other",
 ];
+
+const GOVT_LINKS: Record<string, { url: string; authority: string; icon: string }> = {
+  "Fake Product / Duplicate Brand Product": {
+    url: "https://consumerhelpline.gov.in",
+    authority: "National Consumer Helpline",
+    icon: "🏛️",
+  },
+  "Expired Food Product / Unsafe Food": {
+    url: "https://foscos.fssai.gov.in",
+    authority: "FSSAI Food Safety Portal",
+    icon: "🍽️",
+  },
+  "Overcharging / MRP Violation": {
+    url: "https://consumeraffairs.nic.in",
+    authority: "Ministry of Consumer Affairs",
+    icon: "⚖️",
+  },
+  "Online Shopping Fraud": {
+    url: "https://cybercrime.gov.in",
+    authority: "National Cyber Crime Reporting Portal",
+    icon: "🔐",
+  },
+  "Poor Product Quality": {
+    url: "https://consumerhelpline.gov.in",
+    authority: "National Consumer Helpline",
+    icon: "🏛️",
+  },
+  "Wrong Product Information": {
+    url: "https://consumerhelpline.gov.in",
+    authority: "National Consumer Helpline",
+    icon: "🏛️",
+  },
+  "Misleading Advertisement": {
+    url: "https://consumerhelpline.gov.in",
+    authority: "National Consumer Helpline",
+    icon: "🏛️",
+  },
+};
 
 const EVIDENCE_TYPES = [
   { id: "photo", label: "Product Photo", icon: FileImage, accept: "image/*" },
@@ -575,6 +615,105 @@ export default function ReportForm() {
             </AnimatePresence>
           </div>
         </form>
+
+        {/* ── Government Complaint Section ── */}
+        <AnimatePresence>
+          {complaintReason && GOVT_LINKS[complaintReason] && (
+            <motion.div
+              key={complaintReason}
+              initial={{ opacity: 0, y: 20, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.97 }}
+              transition={{ type: "spring", damping: 24, stiffness: 260 }}
+              className="rounded-2xl overflow-hidden"
+              style={{
+                border: "1px solid rgba(251,191,36,0.35)",
+                boxShadow: "0 0 32px rgba(251,191,36,0.08), 0 0 0 1px rgba(251,191,36,0.06)",
+              }}
+            >
+              {/* Amber top strip */}
+              <div
+                className="h-1 w-full"
+                style={{ background: "linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b)" }}
+              />
+
+              <div className="bg-[#0d0b1e]/90 backdrop-blur-sm px-6 py-6">
+                {/* Icon + heading row */}
+                <div className="flex items-start gap-4 mb-5">
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-xl"
+                    style={{ background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.3)" }}
+                  >
+                    ⚠️
+                  </div>
+                  <div className="flex-1">
+                    {/* English heading */}
+                    <h3 className="font-bold text-base mb-0.5" style={{ color: "#fbbf24" }}>
+                      Government Action Available
+                    </h3>
+                    <p className="text-sm text-gray-300 leading-relaxed">
+                      You can also file an official complaint to the relevant authority based on your complaint reason.
+                    </p>
+
+                    {/* Divider */}
+                    <div className="my-3 h-px" style={{ background: "rgba(251,191,36,0.15)" }} />
+
+                    {/* Hindi heading */}
+                    <h3 className="font-bold text-sm mb-0.5" style={{ color: "#fcd34d" }}>
+                      ⚠ सरकारी कार्रवाई का विकल्प उपलब्ध है
+                    </h3>
+                    <p className="text-sm text-gray-400 leading-relaxed">
+                      आप अपनी शिकायत के आधार पर संबंधित सरकारी विभाग में आधिकारिक शिकायत भी दर्ज कर सकते हैं।
+                    </p>
+                  </div>
+                </div>
+
+                {/* Authority info pill */}
+                <div
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl mb-5"
+                  style={{ background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.18)" }}
+                >
+                  <span className="text-base">{GOVT_LINKS[complaintReason].icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Relevant Authority</p>
+                    <p className="text-sm font-semibold text-white truncate">{GOVT_LINKS[complaintReason].authority}</p>
+                  </div>
+                  <div
+                    className="text-xs px-2.5 py-1 rounded-lg font-semibold flex-shrink-0"
+                    style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
+                  >
+                    Official Gov
+                  </div>
+                </div>
+
+                {/* CTA button */}
+                <motion.a
+                  href={GOVT_LINKS[complaintReason].url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid="button-govt-complaint"
+                  whileHover={{ scale: 1.025 }}
+                  whileTap={{ scale: 0.975 }}
+                  className="flex items-center justify-center gap-2.5 w-full py-3.5 rounded-xl font-bold text-sm tracking-wide transition-all"
+                  style={{
+                    background: "linear-gradient(90deg, #d97706, #f59e0b, #fbbf24)",
+                    color: "#000",
+                    boxShadow: "0 4px 20px rgba(251,191,36,0.3)",
+                  }}
+                  onMouseOver={(e) => { (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 4px 28px rgba(251,191,36,0.5)"; }}
+                  onMouseOut={(e)  => { (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 4px 20px rgba(251,191,36,0.3)"; }}
+                >
+                  <span>File Government Complaint</span>
+                  <ExternalLink className="w-4 h-4" />
+                </motion.a>
+
+                <p className="text-center text-xs text-gray-600 mt-3">
+                  Opens the official government portal in a new tab
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ── Recent Reports ── */}
         <AnimatePresence>
