@@ -45,11 +45,12 @@ export default function Navbar() {
           <Link
             href="/"
             data-testid="link-home"
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              location === "/"
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted"
-            }`}
+            className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+            style={{
+              background: location === "/" ? "rgba(10,30,80,0.85)" : "rgba(8,20,55,0.55)",
+              color: location === "/" ? "#93c5fd" : "#60a5fa",
+              border: `1px solid ${location === "/" ? "rgba(59,130,246,0.45)" : "rgba(59,130,246,0.2)"}`,
+            }}
           >
             {t("nav.home")}
           </Link>
@@ -69,11 +70,13 @@ export default function Navbar() {
           <Link
             href="/about"
             data-testid="link-about"
-            className={`px-4 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
-              location === "/about"
-                ? "bg-primary text-primary-foreground border-primary"
-                : "border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-            }`}
+            className="px-4 py-1.5 rounded-lg text-sm font-semibold transition-all"
+            style={{
+              background: location === "/about" ? "rgba(10,30,80,0.95)" : "rgba(8,20,55,0.7)",
+              color: location === "/about" ? "#bfdbfe" : "#93c5fd",
+              border: `1px solid ${location === "/about" ? "rgba(59,130,246,0.6)" : "rgba(59,130,246,0.35)"}`,
+              boxShadow: location === "/about" ? "0 0 14px rgba(59,130,246,0.2)" : "none",
+            }}
           >
             {t("nav.about")}
           </Link>
