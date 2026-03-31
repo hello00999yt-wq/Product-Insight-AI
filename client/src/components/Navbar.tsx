@@ -36,7 +36,7 @@ export default function Navbar() {
             <ShieldCheck className="w-4 h-4 text-primary-foreground" />
           </div>
           <span className="hidden sm:inline text-sm font-semibold text-foreground/80">
-            FakeGuard AI
+            ProductGuard AI
           </span>
         </Link>
 
