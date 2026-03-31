@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, Fragment } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Bot, Loader2, Volume2, VolumeX, Plus, ImageIcon, VideoIcon, XCircle } from "lucide-react";
+import { X, Send, Bot, Loader2, Plus, ImageIcon, VideoIcon, XCircle } from "lucide-react";
 import { useLang } from "@/context/LanguageContext";
 
 interface Message {
@@ -16,57 +16,46 @@ interface PendingMedia {
   name: string;
 }
 
-const LANG_VOICE_MAP: Record<string, string> = {
-  en: "en-US", hi: "hi-IN", mr: "mr-IN", gu: "gu-IN",
-  bn: "bn-IN", pa: "pa-IN", te: "te-IN", ur: "ur-PK",
-};
-
 export default function HelpAI() {
   const { t, lang } = useLang();
   const QUICK_REPLIES = [
     t("ai.quick1"), t("ai.quick2"), t("ai.quick3"), t("ai.quick4"),
   ];
 
-  const [isOpen, setIsOpen]           = useState(false);
-  const [messages, setMessages]       = useState<Message[]>([{ role: "assistant", content: t("ai.welcome") }]);
-  const [input, setInput]             = useState("");
-  const [isLoading, setIsLoading]     = useState(false);
-  const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
-  const [ttsSupported]                = useState(() => "speechSynthesis" in window);
-  const [attachMenu, setAttachMenu]   = useState(false);
+  const [isOpen, setIsOpen]             = useState(false);
+  const [messages, setMessages]         = useState<Message[]>([{ role: "assistant", content: t("ai.welcome") }]);
+  const [input, setInput]               = useState("");
+  const [isLoading, setIsLoading]       = useState(false);
+  const [attachMenu, setAttachMenu]     = useState(false);
   const [pendingMedia, setPendingMedia] = useState<PendingMedia | null>(null);
 
-  const messagesEndRef  = useRef<HTMLDivElement>(null);
-  const inputRef        = useRef<HTMLInputElement>(null);
-  const utteranceRef    = useRef<SpeechSynthesisUtterance | null>(null);
-  const imageInputRef   = useRef<HTMLInputElement>(null);
-  const videoInputRef   = useRef<HTMLInputElement>(null);
-  const attachMenuRef   = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef       = useRef<HTMLInputElement>(null);
+  const imageInputRef  = useRef<HTMLInputElement>(null);
+  const videoInputRef  = useRef<HTMLInputElement>(null);
+  const attachMenuRef  = useRef<HTMLDivElement>(null);
 
+  /* ── Auto-scroll to latest message ── */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  /* ── Focus input when chat opens ── */
   useEffect(() => {
     if (isOpen) setTimeout(() => inputRef.current?.focus(), 300);
   }, [isOpen]);
 
+  /* ── Open via custom event (from home page button) ── */
   useEffect(() => {
     const handler = () => setIsOpen(true);
     window.addEventListener("openHelpAI", handler);
     return () => window.removeEventListener("openHelpAI", handler);
   }, []);
 
+  /* ── Reset messages when language changes ── */
   useEffect(() => {
-    stopSpeaking();
     setMessages([{ role: "assistant", content: t("ai.welcome") }]);
   }, [lang]);
-
-  useEffect(() => {
-    if (!isOpen) stopSpeaking();
-  }, [isOpen]);
-
-  useEffect(() => () => stopSpeaking(), []);
 
   /* ── Close attach menu when clicking outside ── */
   useEffect(() => {
@@ -78,53 +67,6 @@ export default function HelpAI() {
     if (attachMenu) document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [attachMenu]);
-
-  /* ── TTS helpers ── */
-  const stopSpeaking = useCallback(() => {
-    if (!ttsSupported) return;
-    window.speechSynthesis.cancel();
-    setSpeakingIdx(null);
-  }, [ttsSupported]);
-
-  const speak = useCallback((text: string, msgIndex: number) => {
-    if (!ttsSupported) return;
-    window.speechSynthesis.cancel();
-    setSpeakingIdx(msgIndex);
-
-    const utterance      = new SpeechSynthesisUtterance(text);
-    const targetBCP47    = LANG_VOICE_MAP[lang] ?? "en-US";
-    const targetLangCode = targetBCP47.split("-")[0];
-
-    utterance.lang   = targetBCP47;
-    utterance.rate   = 1;
-    utterance.pitch  = 1;
-    utterance.volume = 1;
-
-    const pickVoice = () => {
-      const voices = window.speechSynthesis.getVoices();
-      const isGoogle = (v: SpeechSynthesisVoice) => v.name.toLowerCase().includes("google");
-
-      const matched =
-        voices.find((v) => v.lang === targetBCP47 && isGoogle(v))           ||
-        voices.find((v) => v.lang === targetBCP47)                           ||
-        voices.find((v) => v.lang.startsWith(targetLangCode) && isGoogle(v))||
-        voices.find((v) => v.lang.startsWith(targetLangCode))                ||
-        voices.find((v) => v.lang.startsWith("en") && isGoogle(v))           ||
-        voices.find((v) => v.lang.startsWith("en"));
-
-      if (matched) utterance.voice = matched;
-      utterance.onend   = () => setSpeakingIdx(null);
-      utterance.onerror = () => setSpeakingIdx(null);
-      utteranceRef.current = utterance;
-      window.speechSynthesis.speak(utterance);
-    };
-
-    if (window.speechSynthesis.getVoices().length > 0) {
-      pickVoice();
-    } else {
-      window.speechSynthesis.addEventListener("voiceschanged", pickVoice, { once: true });
-    }
-  }, [lang, ttsSupported]);
 
   /* ── File pick handler ── */
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>, type: "image" | "video") => {
@@ -146,15 +88,14 @@ export default function HelpAI() {
     const hasMedia = !!media;
     if ((!hasText && !hasMedia) || isLoading) return;
 
-    stopSpeaking();
     setPendingMedia(null);
     setInput("");
 
     const userMsg: Message = {
       role: "user",
       content: hasText ? text : (media!.type === "image" ? "What can you see in this image?" : `I uploaded a video: ${media!.name}`),
-      ...(hasMedia && media!.type === "image"  ? { mediaUrl: media!.dataUrl, mediaType: "image"  } : {}),
-      ...(hasMedia && media!.type === "video"  ? { mediaUrl: media!.dataUrl, mediaType: "video"  } : {}),
+      ...(hasMedia && media!.type === "image" ? { mediaUrl: media!.dataUrl, mediaType: "image" } : {}),
+      ...(hasMedia && media!.type === "video" ? { mediaUrl: media!.dataUrl, mediaType: "video" } : {}),
     };
 
     const newMessages = [...messages, userMsg];
@@ -177,19 +118,12 @@ export default function HelpAI() {
       });
       const data  = await res.json();
       const reply = data.message as string;
-
-      setMessages((prev) => {
-        const updated = [...prev, { role: "assistant" as const, content: reply }];
-        setTimeout(() => speak(reply, updated.length - 1), 0);
-        return updated;
-      });
+      setMessages((prev) => [...prev, { role: "assistant" as const, content: reply }]);
     } catch {
-      const errMsg = "Sorry, something went wrong. Please try again.";
-      setMessages((prev) => {
-        const updated = [...prev, { role: "assistant" as const, content: errMsg }];
-        setTimeout(() => speak(errMsg, updated.length - 1), 0);
-        return updated;
-      });
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant" as const, content: "Sorry, something went wrong. Please try again." },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -249,27 +183,13 @@ export default function HelpAI() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                {ttsSupported && speakingIdx !== null && (
-                  <motion.button
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    onClick={stopSpeaking}
-                    data-testid="button-stop-tts"
-                    className="w-8 h-8 rounded-full bg-black/20 flex items-center justify-center hover:bg-black/30 transition-colors"
-                    title="Stop speaking"
-                  >
-                    <VolumeX className="w-4 h-4 text-black" />
-                  </motion.button>
-                )}
-                <button
-                  data-testid="button-close-chat"
-                  onClick={() => setIsOpen(false)}
-                  className="w-8 h-8 rounded-full bg-black/20 flex items-center justify-center hover:bg-black/30 transition-colors"
-                >
-                  <X className="w-4 h-4 text-black" />
-                </button>
-              </div>
+              <button
+                data-testid="button-close-chat"
+                onClick={() => setIsOpen(false)}
+                className="w-8 h-8 rounded-full bg-black/20 flex items-center justify-center hover:bg-black/30 transition-colors"
+              >
+                <X className="w-4 h-4 text-black" />
+              </button>
             </div>
 
             {/* ── Messages ── */}
@@ -325,27 +245,6 @@ export default function HelpAI() {
                         ? <FormattedMessage text={msg.content} />
                         : msg.content}
                     </div>
-
-                    {msg.role === "assistant" && ttsSupported && (
-                      <motion.button
-                        data-testid={`button-tts-${i}`}
-                        onClick={() => speakingIdx === i ? stopSpeaking() : speak(msg.content, i)}
-                        whileTap={{ scale: 0.9 }}
-                        className="mt-1 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium transition-all"
-                        style={{
-                          background: speakingIdx === i ? "rgba(0,255,136,0.15)" : "rgba(255,255,255,0.04)",
-                          border: `1px solid ${speakingIdx === i ? "#00ff8860" : "rgba(255,255,255,0.08)"}`,
-                          color: speakingIdx === i ? "#00ff88" : "#555",
-                        }}
-                        title={speakingIdx === i ? "Stop" : "Play aloud"}
-                      >
-                        {speakingIdx === i ? (
-                          <><SpeakingWave /><span style={{ color: "#00ff88" }}>Stop</span></>
-                        ) : (
-                          <><Volume2 className="w-3 h-3" /><span>Play</span></>
-                        )}
-                      </motion.button>
-                    )}
                   </div>
                 </motion.div>
               ))}
@@ -552,29 +451,10 @@ export default function HelpAI() {
               </div>
 
               {/* Supported formats hint */}
-              {attachMenu === false && !pendingMedia && (
+              {!attachMenu && !pendingMedia && (
                 <p className="text-center text-xs mt-1.5" style={{ color: "#444" }}>
                   JPG, PNG, MP4 supported
                 </p>
-              )}
-
-              {/* TTS indicator bar */}
-              {ttsSupported && speakingIdx !== null && (
-                <motion.div
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-2 flex items-center justify-center gap-2 text-xs"
-                  style={{ color: "#00ff88" }}
-                >
-                  <SpeakingWave />
-                  <span>Speaking…</span>
-                  <button
-                    onClick={stopSpeaking}
-                    className="underline underline-offset-2 hover:opacity-70 transition-opacity"
-                  >
-                    Stop
-                  </button>
-                </motion.div>
               )}
             </div>
           </motion.div>
@@ -649,22 +529,5 @@ function FormattedMessage({ text }: { text: string }) {
         );
       })}
     </div>
-  );
-}
-
-/* Animated sound-wave bars shown while TTS is active */
-function SpeakingWave() {
-  return (
-    <span className="flex items-end gap-[2px]" style={{ height: "12px" }}>
-      {[0, 0.15, 0.3, 0.15, 0].map((delay, i) => (
-        <motion.span
-          key={i}
-          className="w-[3px] rounded-full"
-          style={{ background: "#00ff88", display: "inline-block" }}
-          animate={{ height: ["4px", "10px", "4px"] }}
-          transition={{ duration: 0.7, repeat: Infinity, delay, ease: "easeInOut" }}
-        />
-      ))}
-    </span>
   );
 }
