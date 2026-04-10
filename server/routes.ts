@@ -61,7 +61,7 @@ export async function registerRoutes(
         messages: [
           {
             role: "system",
-            content: `You are an expert product identifier and authenticator with vision capabilities.
+            content: `You are an expert product identifier, authenticator, and consumer advisor with vision capabilities.
 
 STEP 1 — Check image type:
 - If the image is NOT a physical product package back side (e.g. it's a person, landscape, random object, front-side packaging with only logo/brand design, or non-product image), respond with ONLY: {"side":"front"}
@@ -70,13 +70,13 @@ STEP 1 — Check image type:
 
 STEP 2 — If it IS a back side, return a single JSON with ALL of these fields (ALWAYS in English):
 - side: "back"
-- name: product name in English
-- brand: brand name (keep original script)
-- description: brief product description in English (max 2 sentences)
-- mrp: Maximum Retail Price with currency symbol (e.g. "₹120.00")
-- marketPrice: current market/street price with currency symbol
-- fakeRiskLevel: EXACTLY one of "Low", "Medium", or "High"
-- identificationTips: array of exactly 3 short tips to spot fakes in English (max 12 words each)
+- name: full product name in English (include variant/flavor/type if visible)
+- brand: brand name exactly as printed on the package
+- description: a detailed, informative product description in English covering: what the product is, its category, primary use/purpose, key features or benefits, who it is intended for, and any notable claims (e.g. organic, clinically tested, dermatologist approved). Write at least 5–7 sentences. Be specific and thorough.
+- mrp: Maximum Retail Price with currency symbol exactly as printed (e.g. "₹120.00"). If not visible, estimate based on product type.
+- marketPrice: current typical market/street/online price with currency symbol (may differ from MRP due to discounts).
+- fakeRiskLevel: EXACTLY one of "Low", "Medium", or "High" based on how commonly this product is counterfeited.
+- identificationTips: array of exactly 6 detailed, actionable tips to distinguish genuine from fake products. Each tip must be a complete sentence of 20–30 words covering specific things to check: hologram, seal, barcode scan, packaging quality, font consistency, weight, smell, texture, FSSAI/ISI/BIS marks, manufacturer address, batch code format, expiry date printing style, etc.
 
 Return valid JSON only. No markdown. No explanation.`,
           },
@@ -84,12 +84,12 @@ Return valid JSON only. No markdown. No explanation.`,
             role: "user",
             content: [
               { type: "image_url", image_url: { url: image } },
-              { type: "text", text: "Analyze this product image." },
+              { type: "text", text: "Analyze this product image thoroughly and provide complete, detailed information." },
             ],
           },
         ],
         response_format: { type: "json_object" },
-        max_tokens: 500,
+        max_tokens: 1500,
       });
 
       const aiResultContent = response.choices[0]?.message?.content;
@@ -166,25 +166,26 @@ Return valid JSON only. No markdown. No explanation.`,
       const product = await storage.getProduct(id);
       if (!product) return res.status(404).json({ message: "Product not found" });
 
+      const tipsArray = product.identificationTips.map((_: string, i: number) => `"<tip ${i + 1}>"`).join(", ");
       const prompt = `Translate the following product information from English to ${targetLang}.
 Return ONLY a valid JSON object with these exact keys — no markdown, no explanation:
 {
   "name": "<translated product name>",
   "description": "<translated description>",
-  "identificationTips": ["<tip 1>", "<tip 2>", "<tip 3>"]
+  "identificationTips": [${tipsArray}]
 }
 
 Original data:
 name: ${product.name}
 description: ${product.description}
 identificationTips:
-${product.identificationTips.map((t, i) => `${i + 1}. ${t}`).join("\n")}`;
+${product.identificationTips.map((tip: string, i: number) => `${i + 1}. ${tip}`).join("\n")}`;
 
       const aiRes = await getOpenAIClient().chat.completions.create({
         model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_object" },
-        max_tokens: 400,
+        max_tokens: 1200,
       });
 
       const raw = aiRes.choices[0]?.message?.content ?? "{}";

@@ -211,10 +211,10 @@ export default function ProductDetails() {
                       exit={{ opacity: 0 }}
                       className="space-y-3"
                     >
-                      {[1, 2, 3].map((i) => (
+                      {[1, 2, 3, 4, 5, 6].map((i) => (
                         <div
                           key={i}
-                          className="h-14 rounded-xl animate-pulse"
+                          className="h-16 rounded-xl animate-pulse"
                           style={{ background: "rgba(99,102,241,0.07)" }}
                         />
                       ))}
