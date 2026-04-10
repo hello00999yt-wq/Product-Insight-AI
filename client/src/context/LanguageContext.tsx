@@ -1,16 +1,10 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 
-export type Language = "en" | "hi" | "mr" | "gu" | "bn" | "pa" | "te" | "ur";
+export type Language = "en" | "hi";
 
 export const LANGUAGES: { code: Language; label: string; nativeLabel: string }[] = [
-  { code: "en", label: "English",  nativeLabel: "English"   },
-  { code: "hi", label: "Hindi",    nativeLabel: "हिंदी"      },
-  { code: "mr", label: "Marathi",  nativeLabel: "मराठी"     },
-  { code: "gu", label: "Gujarati", nativeLabel: "ગુજરાતી"   },
-  { code: "bn", label: "Bengali",  nativeLabel: "বাংলা"     },
-  { code: "pa", label: "Punjabi",  nativeLabel: "ਪੰਜਾਬੀ"   },
-  { code: "te", label: "Telugu",   nativeLabel: "తెలుగు"    },
-  { code: "ur", label: "Urdu",     nativeLabel: "اردو"      },
+  { code: "en", label: "English", nativeLabel: "English" },
+  { code: "hi", label: "Hindi",   nativeLabel: "हिंदी"   },
 ];
 
 interface LanguageContextType {
@@ -20,7 +14,7 @@ interface LanguageContextType {
   t: (key: string) => string;
 }
 
-const translations: Record<string, Record<Language, string>> = {
+const translations: Record<string, Record<string, string>> = {
   // Product Details Page
   "pd.back": {
     en: "Back", hi: "वापस", mr: "मागे", gu: "પાછળ",
