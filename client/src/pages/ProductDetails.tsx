@@ -1,7 +1,6 @@
 import { useRoute, Link } from "wouter";
 import { useProduct, useTranslateProduct } from "@/hooks/use-products";
 import { IngredientsAndChemicals } from "@/components/IngredientsAndChemicals";
-import { SimpleAnalysis } from "@/components/SimpleAnalysis";
 import { Loader2, ArrowLeft, Star, Share2, Info, Languages } from "lucide-react";
 import { RiskBadge } from "@/components/RiskBadge";
 import { ProductStamp } from "@/components/ProductStamp";
@@ -187,11 +186,6 @@ export default function ProductDetails() {
                 ) : displayDescription}
               </motion.p>
             </div>
-
-            <Separator />
-
-            {/* Simple AI Analysis */}
-            <SimpleAnalysis productId={id} />
 
             <Separator />
 

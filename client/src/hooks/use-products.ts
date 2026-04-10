@@ -108,36 +108,6 @@ export function useTranslateProduct(id: number, lang: string) {
   });
 }
 
-// GET /api/products/:id/simple-analysis?lang=xx  — cached in localStorage per lang
-export interface SimpleAnalysisData {
-  simpleExplanation: string;
-  quickSummary: string;
-  whatToDo: string;
-  detailedAnalysis: string;
-}
-
-export function useSimpleAnalysis(id: number, lang: string = "en") {
-  const cacheKey = `pg-simple-${id}-${lang}`;
-
-  return useQuery<SimpleAnalysisData>({
-    queryKey: ["/api/products", id, "simple-analysis", lang],
-    queryFn: async () => {
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) return JSON.parse(cached) as SimpleAnalysisData;
-
-      const res = await fetch(`/api/products/${id}/simple-analysis?lang=${lang}`, {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to fetch simple analysis");
-      const data: SimpleAnalysisData = await res.json();
-      localStorage.setItem(cacheKey, JSON.stringify(data));
-      return data;
-    },
-    enabled: !!id,
-    staleTime: Infinity,
-  });
-}
-
 // GET /api/products/:id/ingredients?lang=xx  — cached in localStorage per lang
 export function useProductIngredients(id: number, lang: string = "en") {
   const cacheKey = `pg-ingredients-${id}-${lang}`;
