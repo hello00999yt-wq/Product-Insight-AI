@@ -108,16 +108,25 @@ export function useTranslateProduct(id: number, lang: string) {
   });
 }
 
-// GET /api/products/:id/ingredients
-export function useProductIngredients(id: number) {
+// GET /api/products/:id/ingredients?lang=xx  — cached in localStorage per lang
+export function useProductIngredients(id: number, lang: string = "en") {
+  const cacheKey = `pg-ingredients-${id}-${lang}`;
+
   return useQuery<IngredientsData>({
-    queryKey: ["/api/products", id, "ingredients"],
+    queryKey: ["/api/products", id, "ingredients", lang],
     queryFn: async () => {
-      const res = await fetch(`/api/products/${id}/ingredients`, { credentials: "include" });
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) return JSON.parse(cached) as IngredientsData;
+
+      const res = await fetch(`/api/products/${id}/ingredients?lang=${lang}`, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to fetch ingredient data");
-      return res.json();
+      const data: IngredientsData = await res.json();
+      localStorage.setItem(cacheKey, JSON.stringify(data));
+      return data;
     },
     enabled: !!id,
-    staleTime: 1000 * 60 * 10, // cache for 10 min — same product, same data
+    staleTime: Infinity, // cached in localStorage — never re-fetch
   });
 }

@@ -284,6 +284,13 @@ IMPORTANT: You MUST always respond in ${respondLang} language only, regardless o
       const product = await storage.getProduct(id);
       if (!product) return res.status(404).json({ message: "Product not found" });
 
+      const lang = (req.query.lang as string) || "en";
+      const langNames: Record<string, string> = {
+        en: "English", hi: "Hindi", mr: "Marathi", gu: "Gujarati",
+        bn: "Bengali", pa: "Punjabi", te: "Telugu", ur: "Urdu",
+      };
+      const targetLang = langNames[lang] ?? "English";
+
       const prompt = `You are a product composition expert. Based on the product information below, generate a realistic ingredients and chemical analysis.
 
 Product Name: ${product.name}
@@ -303,9 +310,9 @@ Return ONLY a valid JSON object with this exact structure — no markdown, no ex
 Rules:
 - Provide 5–8 ingredients relevant to this product type. Percentages must add up to approximately 100.
 - Provide 4–6 chemicals commonly found in this product type.
-- For "safety": use "Safe" for benign/natural ingredients, "Warning" for moderate-concern chemicals, "Harmful" for potentially hazardous ones.
+- For "safety": use EXACTLY one of "Safe", "Warning", or "Harmful" (always in English, never translate).
 - Make the data realistic and appropriate for the specific product type (food, cosmetic, electronic, clothing, etc.).
-- Ingredient and chemical names in English.`;
+- Write ALL ingredient and chemical names in ${targetLang} language only.`;
 
       const aiRes = await getOpenAIClient().chat.completions.create({
         model: "gpt-4o-mini",

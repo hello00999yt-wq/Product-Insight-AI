@@ -126,8 +126,8 @@ function ChemicalRow({
 
 /* ── Main export ── */
 export function IngredientsAndChemicals({ productId }: { productId: number }) {
-  const { data, isLoading, isError } = useProductIngredients(productId);
-  const { t } = useLang();
+  const { t, lang } = useLang();
+  const { data, isLoading, isError } = useProductIngredients(productId, lang);
 
   if (isError) return null;
 
