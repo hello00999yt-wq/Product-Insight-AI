@@ -61,77 +61,41 @@ export async function registerRoutes(
       };
       const respondLang = langNames[lang ?? "en"] ?? "English";
 
-      // ── Pre-check: is this the BACK side of a product? ──
-      const sideCheck = await getOpenAIClient().chat.completions.create({
+      // ── Single combined call: side-check + full analysis in one request ──
+      const response = await getOpenAIClient().chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {
+            role: "system",
+            content: `You are an expert product identifier and authenticator with vision capabilities.
+
+STEP 1 — Check image type:
+- If the image is NOT a physical product package back side (e.g. it's a person, landscape, random object, front-side packaging with only logo/brand design, or non-product image), respond with ONLY: {"side":"front"}
+- The BACK side has: barcode, QR code, ingredients, nutritional facts, MRP, manufacturing info, batch/expiry, usage text.
+- The FRONT side has: large logo, brand name in decorative font, marketing imagery.
+
+STEP 2 — If it IS a back side, return a single JSON with ALL of these fields:
+- side: "back"
+- name: product name (in ${respondLang})
+- brand: brand name (keep original script)
+- description: brief description (in ${respondLang}, max 2 sentences)
+- mrp: Maximum Retail Price with currency symbol (e.g. "₹120.00")
+- marketPrice: current market/street price with currency symbol
+- fakeRiskLevel: EXACTLY one of "Low", "Medium", or "High" (always English)
+- identificationTips: array of 3 short tips to spot fakes (each in ${respondLang}, max 12 words each)
+
+Return valid JSON only. No markdown. No explanation.`,
+          },
+          {
             role: "user",
             content: [
-              {
-                type: "text",
-                text: `Look at this image carefully. Determine whether it shows the BACK / INFORMATION side of a physical product package (box, bottle, packet, sachet, wrapper, etc.).
-
-The BACK side typically contains any of these: barcode, QR code, ingredients list, nutritional facts, manufacturing info, expiry date, batch number, legal / regulatory text, product description text, MRP price details, or usage instructions.
-
-The FRONT side typically contains: large brand logo, product name in decorative font, marketing imagery, mascot, or decorative design.
-
-If the image is NOT a product package at all (e.g., a person, landscape, random object, food without packaging), respond with {"side":"front"}.
-
-Respond ONLY with valid JSON — exactly one of:
-{"side":"back"}
-{"side":"front"}`,
-              },
               { type: "image_url", image_url: { url: image } },
+              { type: "text", text: "Analyze this product image." },
             ],
           },
         ],
         response_format: { type: "json_object" },
-        max_tokens: 20,
-      });
-
-      const sideResult = JSON.parse(
-        sideCheck.choices[0]?.message?.content || '{"side":"front"}'
-      );
-
-      if (sideResult.side !== "back") {
-        return res.status(422).json({
-          code: "FRONT_SIDE_IMAGE",
-          message:
-            "Please upload the back side of the product where the QR code, barcode, or product details are visible.",
-        });
-      }
-
-      // Analyze the image using OpenAI Vision
-      const response = await getOpenAIClient().chat.completions.create({
-        model: "gpt-5.1",
-        messages: [
-          {
-            role: "system",
-            content: `You are an expert product identifier and authenticator. Analyze the provided product image and return a JSON object with the following fields:
-            - name: The specific name of the product.
-            - brand: The brand name of the product (keep brand names in their original script, e.g. "Nike", "Rolex").
-            - description: A brief, detailed description of the product.
-            - mrp: The typical Maximum Retail Price (format as a string with currency symbol, e.g. "₹120.00" or "$95.00").
-            - marketPrice: The average current market price or street value (same format as mrp).
-            - fakeRiskLevel: Estimate the risk of encountering fakes. Must be EXACTLY one of these English words: "Low", "Medium", or "High". Never translate this value.
-            - identificationTips: An array of strings, each being a practical tip on how to differentiate a genuine product from a counterfeit.
-
-            LANGUAGE RULE — CRITICAL:
-            You MUST write the values of "name", "description", and every string inside "identificationTips" in ${respondLang} language.
-            The fields "brand", "mrp", "marketPrice", and "fakeRiskLevel" must remain as-is (brand in original script, prices with symbols, fakeRiskLevel in English only).
-
-            Be as accurate as possible. If you cannot identify the exact product, use the closest match. Return valid JSON only.`
-          },
-          {
-            role: "user",
-            content: [
-              { type: "text", text: "Identify this product and provide details." },
-              { type: "image_url", image_url: { url: image } }
-            ]
-          }
-        ],
-        response_format: { type: "json_object" }
+        max_tokens: 500,
       });
 
       const aiResultContent = response.choices[0]?.message?.content;
@@ -141,10 +105,19 @@ Respond ONLY with valid JSON — exactly one of:
 
       const aiData = JSON.parse(aiResultContent);
 
+      // Front-side or non-product image detected
+      if (aiData.side === "front" || !aiData.name) {
+        return res.status(422).json({
+          code: "FRONT_SIDE_IMAGE",
+          message:
+            "Please upload the back side of the product where the QR code, barcode, or product details are visible.",
+        });
+      }
+
       // Validate the AI response format
-      if (!aiData.name || !aiData.brand || !aiData.mrp || !aiData.marketPrice || !aiData.fakeRiskLevel || !Array.isArray(aiData.identificationTips)) {
-          console.error("Invalid AI response structure:", aiData);
-          throw new Error("AI returned malformed data");
+      if (!aiData.brand || !aiData.mrp || !aiData.marketPrice || !aiData.fakeRiskLevel || !Array.isArray(aiData.identificationTips)) {
+        console.error("Invalid AI response structure:", aiData);
+        throw new Error("AI returned malformed data");
       }
 
       // Save to database
