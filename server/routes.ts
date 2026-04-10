@@ -338,6 +338,81 @@ Rules:
     }
   });
 
+  // ── Simple AI Analysis — easy language, 4-section format ──
+  app.get("/api/products/:id/simple-analysis", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid product ID" });
+
+      const product = await storage.getProduct(id);
+      if (!product) return res.status(404).json({ message: "Product not found" });
+
+      const lang = (req.query.lang as string) || "en";
+      const langNames: Record<string, string> = {
+        en: "English", hi: "Hindi", mr: "Marathi", gu: "Gujarati",
+        bn: "Bengali", pa: "Punjabi", te: "Telugu", ur: "Urdu",
+      };
+      const targetLang = langNames[lang] ?? "English";
+
+      const riskLabel = product.fakeRiskLevel === "Low"
+        ? "Low Risk (Likely Genuine)"
+        : product.fakeRiskLevel === "Medium"
+        ? "Medium Risk (Check Carefully)"
+        : "High Risk (Possibly Fake)";
+
+      const prompt = `You are a friendly consumer protection assistant helping everyday people in India understand product authenticity.
+
+Product Information:
+- Name: ${product.name}
+- Brand: ${product.brand}
+- Description: ${product.description}
+- MRP: ${product.mrp}
+- Market Price: ${product.marketPrice}
+- Fake Risk: ${riskLabel}
+- How to Spot Fakes: ${product.identificationTips.join(" | ")}
+
+Generate a simple, friendly analysis in ${targetLang} language. Return ONLY a valid JSON with these 4 keys (no markdown, no explanation):
+
+{
+  "simpleExplanation": "Explain what this product is and if it seems real or fake. Use very simple words, like explaining to someone who has never used this product. Short sentences only (max 20 words each). Wrap the final verdict like 'This product looks genuine' or 'Be careful, this may be fake' inside <span class=\\"highlight\\">...</span>.",
+  "quickSummary": "Write the final result in 1–2 very simple lines. Wrap the key result inside <span class=\\"highlight\\">...</span>.",
+  "whatToDo": "Give 3–4 simple action steps the person should take (e.g. check seal, compare price, scan barcode). Each step on a new line, starting with a number. Wrap any important warning inside <span class=\\"highlight\\">...</span>.",
+  "detailedAnalysis": "Write a full detailed analysis covering: (1) Price comparison — is MRP vs market price normal or suspicious? (2) Authenticity risk — what makes this product prone to faking? (3) Key things to check physically. (4) Final buying advice. Use simple language throughout. Wrap critical warnings or verdicts inside <span class=\\"highlight\\">...</span>."
+}
+
+Rules (VERY IMPORTANT):
+- Write everything in ${targetLang} only.
+- Use VERY SIMPLE everyday words. No technical terms.
+- Short sentences. No complex grammar.
+- Do NOT use markdown (no **, no ##, no - bullets).
+- Only use plain text + <span class="highlight">...</span> for highlighting.
+- Highlight any final verdict, warning, or important advice in green.`;
+
+      const aiRes = await getOpenAIClient().chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+        max_tokens: 1200,
+      });
+
+      const raw = aiRes.choices[0]?.message?.content ?? "{}";
+      const parsed = JSON.parse(raw);
+
+      const schema = z.object({
+        simpleExplanation: z.string(),
+        quickSummary: z.string(),
+        whatToDo: z.string(),
+        detailedAnalysis: z.string(),
+      });
+
+      const result = schema.parse(parsed);
+      res.json(result);
+    } catch (err) {
+      console.error("Simple analysis error:", err);
+      res.status(500).json({ message: "Failed to generate simple analysis" });
+    }
+  });
+
   return httpServer;
 }
 

@@ -392,6 +392,15 @@ const translations: Record<string, Record<string, string>> = {
     te: "ఈ ప్రాజెక్ట్ ఇమేజ్ రికగ్నిషన్ + ఉత్పత్తి పారదర్శకత వేదిక. వినియోగదారులు ఏ ఉత్పత్తి ఫోటోనైనా అప్‌లోడ్ చేయగలరు. AI ఉత్పత్తిని గుర్తించి పూర్తి, ధృవీకరించిన సమాచారాన్ని చూపిస్తుంది.",
     ur: "یہ منصوبہ ایک امیج ریکگنیشن + پروڈکٹ شفافیت پلیٹ فارم ہے۔ صارفین کسی بھی پروڈکٹ کی تصویر اپلوڈ کر سکتے ہیں۔ AI پروڈکٹ کی شناخت کر کے مکمل، تصدیق شدہ اور قابل اعتماد معلومات دکھاتا ہے۔",
   },
+  // Simple AI Analysis
+  "sa.title":   { en: "AI Product Analysis",        hi: "AI उत्पाद विश्लेषण" },
+  "sa.simple":  { en: "🧠 Simple Explanation",      hi: "🧠 सरल व्याख्या" },
+  "sa.summary": { en: "📌 Quick Summary",           hi: "📌 संक्षिप्त सारांश" },
+  "sa.todo":    { en: "💡 What You Should Do",      hi: "💡 आपको क्या करना चाहिए" },
+  "sa.detail":  { en: "🔍 Detailed Analysis",       hi: "🔍 विस्तृत विश्लेषण" },
+  "sa.loading": { en: "Generating AI analysis…",    hi: "AI विश्लेषण तैयार हो रहा है…" },
+  "sa.badge":   { en: "AI Powered",                 hi: "AI संचालित" },
+
   // Report Form
   "rf.badge":       { en: "AI-Powered Consumer Protection",       hi: "AI-संचालित उपभोक्ता सुरक्षा" },
   "rf.hero.title1": { en: "Report Fake Products &",               hi: "नकली उत्पाद और" },
