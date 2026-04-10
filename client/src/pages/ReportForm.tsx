@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ShieldCheck, CheckCircle2, XCircle, FileImage, Video, Receipt, Package, ExternalLink } from "lucide-react";
+import { useLang } from "@/context/LanguageContext";
 
 interface Report {
   id: number;
@@ -23,6 +24,7 @@ interface ShopStats {
   markerColor: "green" | "yellow" | "red";
 }
 
+// English keys — used as GOVT_LINKS keys and stored in state
 const COMPLAINT_REASONS = [
   "Fake Product / Duplicate Brand Product",
   "Expired Food Product / Unsafe Food",
@@ -33,6 +35,18 @@ const COMPLAINT_REASONS = [
   "Misleading Advertisement",
   "Other",
 ];
+
+// Maps each reason to its translation key
+const REASON_KEY_MAP: Record<string, string> = {
+  "Fake Product / Duplicate Brand Product": "rf.reason.1",
+  "Expired Food Product / Unsafe Food":     "rf.reason.2",
+  "Overcharging / MRP Violation":           "rf.reason.3",
+  "Online Shopping Fraud":                  "rf.reason.4",
+  "Poor Product Quality":                   "rf.reason.5",
+  "Wrong Product Information":              "rf.reason.6",
+  "Misleading Advertisement":               "rf.reason.7",
+  "Other":                                  "rf.reason.8",
+};
 
 const GOVT_LINKS: Record<string, { url: string; authority: string; icon: string }> = {
   "Fake Product / Duplicate Brand Product": {
@@ -72,11 +86,11 @@ const GOVT_LINKS: Record<string, { url: string; authority: string; icon: string 
   },
 };
 
-const EVIDENCE_TYPES = [
-  { id: "photo", label: "Product Photo", icon: FileImage, accept: "image/*" },
-  { id: "bill", label: "Bill / Receipt", icon: Receipt, accept: "image/*,application/pdf" },
-  { id: "packaging", label: "Packaging Photo", icon: Package, accept: "image/*" },
-  { id: "video", label: "Short Video", icon: Video, accept: "video/*" },
+const EVIDENCE_TYPE_DEFS = [
+  { id: "photo",     labelKey: "rf.ev.photo",     icon: FileImage, accept: "image/*" },
+  { id: "bill",      labelKey: "rf.ev.bill",      icon: Receipt,   accept: "image/*,application/pdf" },
+  { id: "packaging", labelKey: "rf.ev.packaging", icon: Package,   accept: "image/*" },
+  { id: "video",     labelKey: "rf.ev.video",     icon: Video,     accept: "video/*" },
 ];
 
 const reportsDB: Report[] = [];
@@ -96,6 +110,7 @@ function getMarkerColor(score: number): "green" | "yellow" | "red" {
 
 export default function ReportForm() {
   const [, navigate] = useLocation();
+  const { t } = useLang();
 
   const [shopName, setShopName] = useState("");
   const [productName, setProductName] = useState("");
@@ -111,12 +126,12 @@ export default function ReportForm() {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const validateReport = (): { valid: boolean; message: string } => {
-    if (!shopName.trim()) return { valid: false, message: "Shop name is required." };
-    if (!productName.trim()) return { valid: false, message: "Product name is required." };
-    if (!complaintReason) return { valid: false, message: "Please select a complaint reason." };
+    if (!shopName.trim()) return { valid: false, message: t("rf.err.shop") };
+    if (!productName.trim()) return { valid: false, message: t("rf.err.product") };
+    if (!complaintReason) return { valid: false, message: t("rf.err.reason") };
     if (!description.trim() || description.trim().length < 10)
-      return { valid: false, message: "Description must be at least 10 characters." };
-    if (rating < 1 || rating > 5) return { valid: false, message: "Please provide a rating (1–5 stars)." };
+      return { valid: false, message: t("rf.err.desc") };
+    if (rating < 1 || rating > 5) return { valid: false, message: t("rf.err.rating") };
     return { valid: true, message: "" };
   };
 
@@ -130,7 +145,7 @@ export default function ReportForm() {
     const validation = validateReport();
     if (!validation.valid) {
       setSubmitStatus("error");
-      setSubmitMessage(`Report rejected due to incomplete or suspicious data. ${validation.message}`);
+      setSubmitMessage(`${t("rf.err.prefix")} ${validation.message}`);
       setIsSubmitting(false);
       return;
     }
@@ -171,9 +186,9 @@ export default function ReportForm() {
     setShowSuccessPopup(true);
 
     const ts = shopStatsMap[key].trustScore;
-    const badge = ts >= 80 ? " — ⭐ Trusted Seller · 🟢 Verified Shop" : "";
+    const badge = ts >= 80 ? ` — ${t("rf.trusted")}` : "";
     setSubmitMessage(
-      `Report submitted successfully! Trust Score for "${shopName}": ${ts}%${badge}`
+      `${t("rf.success.msg")} "${shopName}": ${ts}%${badge}`
     );
 
     setShopName("");
@@ -209,10 +224,10 @@ export default function ReportForm() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#8b5cf6]/40 bg-[#8b5cf6]/10 text-[#a78bfa] text-xs font-semibold mb-4 tracking-widest uppercase">
               <ShieldCheck className="w-3.5 h-3.5" />
-              AI-Powered Consumer Protection
+              {t("rf.badge")}
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
-              Report Fake Products &{" "}
+              {t("rf.hero.title1")}{" "}
               <span
                 style={{
                   background: "linear-gradient(90deg, #a78bfa, #60a5fa)",
@@ -220,12 +235,11 @@ export default function ReportForm() {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                Shops
+                {t("rf.hero.title2")}
               </span>
             </h1>
             <p className="text-gray-400 max-w-xl mx-auto text-sm md:text-base">
-              Help protect consumers across India. Submit evidence, pin the location, and
-              our AI will validate and update the shop's Trust Score in real time.
+              {t("rf.hero.sub")}
             </p>
           </motion.div>
         </div>
@@ -234,29 +248,29 @@ export default function ReportForm() {
       <div className="container max-w-4xl mx-auto px-4 py-10 space-y-8">
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* ── Section 1: Report Details ── */}
-          <Section title="Submit a Shop or Product Report" icon="📋">
+          <Section title={t("rf.sec1.title")} icon="📋">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <Field label="Shop Name" required>
+              <Field label={t("rf.field.shop")} required>
                 <input
                   data-testid="input-shop-name"
                   type="text"
                   value={shopName}
                   onChange={(e) => setShopName(e.target.value)}
-                  placeholder="e.g. Sharma Electronics"
+                  placeholder={t("rf.field.shop.ph")}
                   className={inputCls}
                 />
               </Field>
-              <Field label="Product Name" required>
+              <Field label={t("rf.field.product")} required>
                 <input
                   data-testid="input-product-name"
                   type="text"
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
-                  placeholder="e.g. Realme 12 Pro"
+                  placeholder={t("rf.field.product.ph")}
                   className={inputCls}
                 />
               </Field>
-              <Field label="Complaint Reason" required>
+              <Field label={t("rf.field.reason")} required>
                 <select
                   data-testid="select-complaint-reason"
                   value={complaintReason}
@@ -264,16 +278,16 @@ export default function ReportForm() {
                   className={inputCls}
                 >
                   <option value="" disabled>
-                    Select a reason...
+                    {t("rf.field.reason.ph")}
                   </option>
                   {COMPLAINT_REASONS.map((r) => (
                     <option key={r} value={r}>
-                      {r}
+                      {t(REASON_KEY_MAP[r])}
                     </option>
                   ))}
                 </select>
               </Field>
-              <Field label="Rating (1–5 Stars)" required>
+              <Field label={t("rf.field.rating")} required>
                 <div className="flex items-center gap-1 pt-1">
                   {[1, 2, 3, 4, 5].map((s) => (
                     <button
@@ -295,31 +309,31 @@ export default function ReportForm() {
                   ))}
                   {rating > 0 && (
                     <span className="ml-2 text-sm text-[#a78bfa] font-semibold">
-                      {["", "Poor", "Fair", "Average", "Good", "Excellent"][rating]}
+                      {t(`rf.rating.${rating}`)}
                     </span>
                   )}
                 </div>
               </Field>
             </div>
-            <Field label="Complaint Description" required className="mt-5">
+            <Field label={t("rf.field.desc")} required className="mt-5">
               <textarea
                 data-testid="textarea-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
-                placeholder="Describe the issue in detail (minimum 10 characters)..."
+                placeholder={t("rf.field.desc.ph")}
                 className={inputCls + " resize-none"}
               />
             </Field>
           </Section>
 
           {/* ── Section 2: Evidence Upload ── */}
-          <Section title="Evidence Upload (Optional)" icon="📎">
+          <Section title={t("rf.sec2.title")} icon="📎">
             <p className="text-gray-500 text-sm mb-4">
-              Attach supporting evidence to strengthen your report. All uploads are optional.
+              {t("rf.sec2.desc")}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {EVIDENCE_TYPES.map(({ id, label, icon: Icon, accept }) => {
+              {EVIDENCE_TYPE_DEFS.map(({ id, labelKey, icon: Icon, accept }) => {
                 const file = uploadedFiles[id];
                 return (
                   <label
@@ -338,11 +352,11 @@ export default function ReportForm() {
                     >
                       <Icon className="w-5 h-5 text-[#a78bfa]" />
                     </div>
-                    <span className="text-sm font-semibold text-gray-300">{label}</span>
+                    <span className="text-sm font-semibold text-gray-300">{t(labelKey)}</span>
                     {file ? (
                       <span className="text-xs text-[#a78bfa] truncate max-w-[160px]">{file.name}</span>
                     ) : (
-                      <span className="text-xs text-gray-600">Click to upload</span>
+                      <span className="text-xs text-gray-600">{t("rf.ev.upload")}</span>
                     )}
                   </label>
                 );
@@ -373,10 +387,10 @@ export default function ReportForm() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z" />
                   </svg>
-                  Validating Report...
+                  {t("rf.submitting")}
                 </span>
               ) : (
-                "Submit Report"
+                t("rf.submit")
               )}
             </motion.button>
 
@@ -435,23 +449,11 @@ export default function ReportForm() {
                     ⚠️
                   </div>
                   <div className="flex-1">
-                    {/* English heading */}
                     <h3 className="font-bold text-base mb-0.5" style={{ color: "#fbbf24" }}>
-                      Government Action Available
+                      {t("rf.govt.title")}
                     </h3>
                     <p className="text-sm text-gray-300 leading-relaxed">
-                      You can also file an official complaint to the relevant authority based on your complaint reason.
-                    </p>
-
-                    {/* Divider */}
-                    <div className="my-3 h-px" style={{ background: "rgba(251,191,36,0.15)" }} />
-
-                    {/* Hindi heading */}
-                    <h3 className="font-bold text-sm mb-0.5" style={{ color: "#fcd34d" }}>
-                      ⚠ सरकारी कार्रवाई का विकल्प उपलब्ध है
-                    </h3>
-                    <p className="text-sm text-gray-400 leading-relaxed">
-                      आप अपनी शिकायत के आधार पर संबंधित सरकारी विभाग में आधिकारिक शिकायत भी दर्ज कर सकते हैं।
+                      {t("rf.govt.desc")}
                     </p>
                   </div>
                 </div>
@@ -463,14 +465,14 @@ export default function ReportForm() {
                 >
                   <span className="text-base">{GOVT_LINKS[complaintReason].icon}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Relevant Authority</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">{t("rf.govt.authority")}</p>
                     <p className="text-sm font-semibold text-white truncate">{GOVT_LINKS[complaintReason].authority}</p>
                   </div>
                   <div
                     className="text-xs px-2.5 py-1 rounded-lg font-semibold flex-shrink-0"
                     style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
                   >
-                    Official Gov
+                    {t("rf.govt.official")}
                   </div>
                 </div>
 
@@ -491,12 +493,12 @@ export default function ReportForm() {
                   onMouseOver={(e) => { (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 4px 28px rgba(251,191,36,0.5)"; }}
                   onMouseOut={(e)  => { (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 4px 20px rgba(251,191,36,0.3)"; }}
                 >
-                  <span>File Government Complaint</span>
+                  <span>{t("rf.govt.btn")}</span>
                   <ExternalLink className="w-4 h-4" />
                 </motion.a>
 
                 <p className="text-center text-xs text-gray-600 mt-3">
-                  Opens the official government portal in a new tab
+                  {t("rf.govt.note")}
                 </p>
               </div>
             </motion.div>
@@ -510,7 +512,7 @@ export default function ReportForm() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <Section title="Recently Submitted Reports" icon="📊">
+              <Section title={t("rf.recent.title")} icon="📊">
                 <div className="space-y-3">
                   {submittedReports.map((r) => {
                     const key = r.shopName.toLowerCase();
@@ -538,14 +540,14 @@ export default function ReportForm() {
                         </div>
                         <div className="flex items-center gap-3 sm:shrink-0">
                           <div className="text-right">
-                            <p className="text-xs text-gray-500">Trust Score</p>
+                            <p className="text-xs text-gray-500">{t("rf.trust_score")}</p>
                             <p className="font-bold text-sm" style={{ color: colorMap[color] }}>
                               {ts}%
                             </p>
                           </div>
                           {ts >= 80 && (
                             <div className="px-2.5 py-1 rounded-lg bg-[#22c55e]/10 border border-[#22c55e]/30 text-[#22c55e] text-xs font-semibold whitespace-nowrap">
-                              ⭐ Trusted Seller
+                              {t("rf.trusted_seller")}
                             </div>
                           )}
                           <div className="flex">
@@ -570,12 +572,12 @@ export default function ReportForm() {
         </AnimatePresence>
 
         {/* ── Trust Score Legend ── */}
-        <Section title="Trust Score Legend" icon="🔰">
+        <Section title={t("rf.legend.title")} icon="🔰">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { color: "#22c55e", border: "#16a34a", label: "Trusted Shop", range: "80–100%", icon: "🟢", desc: "Verified & reliable" },
-              { color: "#eab308", border: "#ca8a04", label: "Average Shop", range: "50–79%", icon: "🟡", desc: "Some complaints" },
-              { color: "#ef4444", border: "#dc2626", label: "Complaint Shop", range: "0–49%", icon: "🔴", desc: "High risk, avoid" },
+              { color: "#22c55e", border: "#16a34a", label: t("rf.legend.trusted"), range: "80–100%", icon: "🟢", desc: t("rf.legend.trusted.desc") },
+              { color: "#eab308", border: "#ca8a04", label: t("rf.legend.average"), range: "50–79%", icon: "🟡", desc: t("rf.legend.average.desc") },
+              { color: "#ef4444", border: "#dc2626", label: t("rf.legend.risk"),    range: "0–49%",   icon: "🔴", desc: t("rf.legend.risk.desc") },
             ].map((item) => (
               <div
                 key={item.label}
@@ -672,7 +674,7 @@ export default function ReportForm() {
                       WebkitTextFillColor: "transparent",
                     }}
                   >
-                    Thank You! ✅
+                    {t("rf.popup.thanks")}
                   </motion.h2>
 
                   {/* Message body */}
@@ -683,13 +685,13 @@ export default function ReportForm() {
                     className="space-y-2 mb-8"
                   >
                     <p className="text-white/90 font-semibold text-sm leading-relaxed">
-                      Your report has been successfully submitted.
+                      {t("rf.popup.submitted")}
                     </p>
                     <p className="text-gray-400 text-sm leading-relaxed">
-                      Our team will review the information shortly.
+                      {t("rf.popup.review")}
                     </p>
                     <p className="text-[#4ade80] text-sm font-medium leading-relaxed pt-1">
-                      Thank you for helping us keep the marketplace transparent.
+                      {t("rf.popup.thanks2")}
                     </p>
                   </motion.div>
 
@@ -708,7 +710,7 @@ export default function ReportForm() {
                       boxShadow: "0 0 20px rgba(34,197,94,0.35)",
                     }}
                   >
-                    Got it — Close
+                    {t("rf.popup.btn")}
                   </motion.button>
                 </div>
               </motion.div>
