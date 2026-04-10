@@ -55,13 +55,7 @@ export async function registerRoutes(
     try {
       const { image, lang } = api.products.analyze.input.parse(req.body);
 
-      const langNames: Record<string, string> = {
-        en: "English", hi: "Hindi", mr: "Marathi", gu: "Gujarati",
-        bn: "Bengali", pa: "Punjabi", te: "Telugu", ur: "Urdu",
-      };
-      const respondLang = langNames[lang ?? "en"] ?? "English";
-
-      // ── Single combined call: side-check + full analysis in one request ──
+      // ── Single combined call: side-check + full analysis in English ──
       const response = await getOpenAIClient().chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
@@ -74,15 +68,15 @@ STEP 1 — Check image type:
 - The BACK side has: barcode, QR code, ingredients, nutritional facts, MRP, manufacturing info, batch/expiry, usage text.
 - The FRONT side has: large logo, brand name in decorative font, marketing imagery.
 
-STEP 2 — If it IS a back side, return a single JSON with ALL of these fields:
+STEP 2 — If it IS a back side, return a single JSON with ALL of these fields (ALWAYS in English):
 - side: "back"
-- name: product name (in ${respondLang})
+- name: product name in English
 - brand: brand name (keep original script)
-- description: brief description (in ${respondLang}, max 2 sentences)
+- description: brief product description in English (max 2 sentences)
 - mrp: Maximum Retail Price with currency symbol (e.g. "₹120.00")
 - marketPrice: current market/street price with currency symbol
-- fakeRiskLevel: EXACTLY one of "Low", "Medium", or "High" (always English)
-- identificationTips: array of 3 short tips to spot fakes (each in ${respondLang}, max 12 words each)
+- fakeRiskLevel: EXACTLY one of "Low", "Medium", or "High"
+- identificationTips: array of exactly 3 short tips to spot fakes in English (max 12 words each)
 
 Return valid JSON only. No markdown. No explanation.`,
           },
@@ -142,6 +136,70 @@ Return valid JSON only. No markdown. No explanation.`,
         });
       }
       res.status(500).json({ message: "Failed to analyze product. Please try another image." });
+    }
+  });
+
+  // Translate product fields into a target language (no re-analysis)
+  app.post("/api/products/:id/translate", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid product ID" });
+
+      const { lang } = req.body as { lang?: string };
+      if (!lang || lang === "en") {
+        // English is the stored language — return as-is
+        const product = await storage.getProduct(id);
+        if (!product) return res.status(404).json({ message: "Product not found" });
+        return res.json({
+          name: product.name,
+          description: product.description,
+          identificationTips: product.identificationTips,
+        });
+      }
+
+      const langNames: Record<string, string> = {
+        hi: "Hindi", mr: "Marathi", gu: "Gujarati",
+        bn: "Bengali", pa: "Punjabi", te: "Telugu", ur: "Urdu",
+      };
+      const targetLang = langNames[lang] ?? "Hindi";
+
+      const product = await storage.getProduct(id);
+      if (!product) return res.status(404).json({ message: "Product not found" });
+
+      const prompt = `Translate the following product information from English to ${targetLang}.
+Return ONLY a valid JSON object with these exact keys — no markdown, no explanation:
+{
+  "name": "<translated product name>",
+  "description": "<translated description>",
+  "identificationTips": ["<tip 1>", "<tip 2>", "<tip 3>"]
+}
+
+Original data:
+name: ${product.name}
+description: ${product.description}
+identificationTips:
+${product.identificationTips.map((t, i) => `${i + 1}. ${t}`).join("\n")}`;
+
+      const aiRes = await getOpenAIClient().chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+        max_tokens: 400,
+      });
+
+      const raw = aiRes.choices[0]?.message?.content ?? "{}";
+      const translated = JSON.parse(raw);
+
+      res.json({
+        name: translated.name ?? product.name,
+        description: translated.description ?? product.description,
+        identificationTips: Array.isArray(translated.identificationTips)
+          ? translated.identificationTips
+          : product.identificationTips,
+      });
+    } catch (err) {
+      console.error("Translation error:", err);
+      res.status(500).json({ message: "Translation failed" });
     }
   });
 

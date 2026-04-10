@@ -75,6 +75,39 @@ export function useAnalyzeProduct() {
   });
 }
 
+// POST /api/products/:id/translate  — cached in localStorage
+export interface TranslatedProduct {
+  name: string;
+  description: string;
+  identificationTips: string[];
+}
+
+export function useTranslateProduct(id: number, lang: string) {
+  const cacheKey = `pg-translate-${id}-${lang}`;
+
+  return useQuery<TranslatedProduct>({
+    queryKey: ["/api/products", id, "translate", lang],
+    queryFn: async () => {
+      // Return cache hit immediately
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) return JSON.parse(cached) as TranslatedProduct;
+
+      const res = await fetch(`/api/products/${id}/translate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lang }),
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Translation failed");
+      const data: TranslatedProduct = await res.json();
+      localStorage.setItem(cacheKey, JSON.stringify(data));
+      return data;
+    },
+    enabled: !!id,
+    staleTime: Infinity, // never re-fetch once cached
+  });
+}
+
 // GET /api/products/:id/ingredients
 export function useProductIngredients(id: number) {
   return useQuery<IngredientsData>({
