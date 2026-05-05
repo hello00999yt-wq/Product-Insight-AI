@@ -1,6 +1,8 @@
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { neonConfig, Pool } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/node-postgres";
+import pg from "pg";
 import * as schema from "@shared/schema";
+
+const { Pool } = pg;
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -8,11 +10,12 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// In non-edge environments (Node.js), use WebSocket for the Neon driver.
-// This allows the serverless driver to work in both development and
-// autoscale/production deployments, automatically waking the Neon endpoint.
-import ws from "ws";
-neonConfig.webSocketConstructor = ws;
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+  max: 3,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 export const db = drizzle(pool, { schema });
