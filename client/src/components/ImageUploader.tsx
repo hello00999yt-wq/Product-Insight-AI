@@ -58,14 +58,44 @@ export function ImageUploader({ onImageSelected, isAnalyzing }: ImageUploaderPro
     return () => timers.forEach(clearTimeout);
   }, [isAnalyzing]);
 
+  const compressImage = (dataUrl: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1200;
+        let { width, height } = img;
+        if (width > MAX || height > MAX) {
+          if (width > height) { height = Math.round((height * MAX) / width); width = MAX; }
+          else { width = Math.round((width * MAX) / height); height = MAX; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width || 800;
+        canvas.height = height || 600;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const jpeg = canvas.toDataURL("image/jpeg", 0.85);
+        if (jpeg === "data:,") reject(new Error("Canvas export failed"));
+        else resolve(jpeg);
+      };
+      img.onerror = () => reject(new Error("Image load failed"));
+      img.src = dataUrl;
+    });
+  };
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        setPreview(result);
-        onImageSelected(result);
+      reader.onload = async () => {
+        const raw = reader.result as string;
+        try {
+          const compressed = await compressImage(raw);
+          setPreview(compressed);
+          onImageSelected(compressed);
+        } catch {
+          setPreview(raw);
+          onImageSelected(raw);
+        }
       };
       reader.readAsDataURL(file);
     }

@@ -127,8 +127,14 @@ Return valid JSON only. No markdown. No explanation.`,
       });
 
       res.status(200).json(product);
-    } catch (err) {
-      console.error("Product analysis error:", err);
+    } catch (err: any) {
+      console.error("Product analysis error:", err?.message || err);
+      if (err?.status === 400 && err?.message?.includes("image")) {
+        return res.status(422).json({
+          code: "INVALID_IMAGE",
+          message: "Image could not be processed. Please try a clearer photo of the product back side.",
+        });
+      }
       if (err instanceof z.ZodError) {
         return res.status(400).json({
           message: err.errors[0]?.message || "Validation error",
